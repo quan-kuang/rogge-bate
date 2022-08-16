@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.mysql.DemoMapper">
+
+    <select id="queryDataBase" resultType="java.util.HashMap">
+        SELECT table_catalog, table_schema, count(table_name)
+        FROM information_schema.tables
+        GROUP BY table_catalog, table_schema
+    </select>
+
+    <insert id="insertTest" parameterType="java.lang.String">
+        INSERT INTO test (uuid)
+        VALUES (#{uuid})
+    </insert>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.postgresql.DeptMapper">
+
+    <!--定义dept表的查询SQL-->
+    <sql id="selectDeptSql">
+        SELECT a.uuid, a.name, a.parent_id, a.parent_name, a.sort, a.status, a.remark, a.creator_id, a.creator_name, a.create_time, a.update_time
+    </sql>
+
+    <!--保存部门（主键存在则更新）-->
+    <insert id="saveDept" parameterType="com.loyer.modules.system.entity.Dept">
+        INSERT INTO dept (uuid, name, parent_id, parent_name, sort, status, remark, creator_id, creator_name)
+        VALUES (coalesce(#{uuid}, replace(((uuid_generate_v4())::CHARACTER VARYING)::TEXT, '-'::TEXT, ''::TEXT)), #{name}, #{parentId}, #{parentName}, #{sort}, #{status}, #{remark}, #{params.userId}, #{params.userName})
+        ON CONFLICT(uuid) DO
+        UPDATE SET name = #{name}, parent_id = #{parentId}, parent_name = #{parentName}, sort = #{sort}, status = #{status}, remark = #{remark}, update_time = now()
+    </insert>
+
+    <!--查询部门-->
+    <select id="selectDept" parameterType="com.loyer.modules.system.entity.Dept" resultType="com.loyer.modules.system.entity.Dept">
+        <include refid="selectDeptSql"/>
+        FROM dept a
+        <where>
+            <if test="uuid != null and uuid != ''">AND a.uuid = #{uuid}</if>
+            <if test="name != null and name != ''">AND a.name ~ #{name}</if>
+            <if test="parentId != null and parentId != ''">AND a.parent_id = #{parentId}</if>
+            <if test="parentName != null and parentName != ''">AND a.parent_name = #{parentName}</if>
+            <if test="sort != null">AND a.sort = #{sort}</if>
+            <if test="status != null">AND a.status = #{status}</if>
+            <if test="remark != null and remark != ''">AND a.remark = #{remark}</if>
+            <if test="creatorId != null and creatorId != ''">AND a.creator_id = #{creatorId}</if>
+            <if test="creatorName != null and creatorName != ''">AND a.creator_name = #{creatorName}</if>
+            <if test="createTime != null">AND a.create_time = #{createTime}</if>
+            <if test="updateTime != null">AND a.update_time = #{updateTime}</if>
+            <!--数据权限过滤-->
+            <if test="params != null and params.isAdmin != true and params.permissionScope != 0">
+                <choose>
+                    <when test="params.permissionScope == 4">AND a.creator_id = ${params.scopeSql}</when>
+                    <otherwise>AND a.uuid IN ${params.scopeSql}</otherwise>
+                </choose>
+            </if>
+        </where>
+        ORDER BY a.sort
+    </select>
+
+    <!--批量删除部门-->
+    <delete id="deleteDept">
+        DELETE FROM dept WHERE creator_id != 'root' AND uuid IN
+        <foreach collection="uuids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!--部门级联查询-->
+    <select id="selectCascade" resultType="java.lang.String">
+        WITH RECURSIVE temp AS (
+        SELECT a.uuid, a.parent_id FROM dept a WHERE a.uuid IN
+        <foreach collection="uuids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        UNION ALL SELECT b.uuid, b.parent_id FROM dept b INNER JOIN temp c ON b.parent_id = c.uuid)
+        SELECT uuid FROM temp
+    </select>
+
+    <!--查询部门排序-->
+    <select id="selectDeptSort" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT max(sort)FROM dept WHERE parent_id = #{parentId}
+    </select>
+</mapper>

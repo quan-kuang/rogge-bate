@@ -1,0 +1,64 @@
+<template>
+    <div class="add">
+        <panel-title title="新增${tableText}"/>
+        <el-form ref="form" label-width="100px" :model="form" :rules="rules" lstatus-icon>
+            <el-row>
+            #foreach (${fieldExplain} in ${fieldExplainList})
+                <el-col :span="8">
+                    <el-form-item label="${fieldExplain.fieldText}" prop="${fieldExplain.javaName}">
+                        <el-input v-model="form.${fieldExplain.javaName}" placeholder="请输入${fieldExplain.fieldText}" maxlength="18" clearable/>
+                    </el-form-item>
+                </el-col>
+            #end
+            </el-row>
+            <el-row>
+                <el-col :span="16">
+                    <el-form-item label="备注" prop="remark">
+                        <el-input type="textarea" v-model="form.remark" maxlength="180"/>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-form-item>
+                <el-button type="success" @click="submit">保存</el-button>
+                <el-button type="primary" @click="goBack">返回</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
+</template>
+
+<script>
+import mixin from '../js/mixin';
+import {save${className}} from '@assets/js/api/${variableName}';
+
+export default {
+    name: 'add',
+    mixins: [mixin],
+    props: ['params'],
+    data() {
+        return {
+            form: {},
+        };
+    },
+    activated() {
+        this.params.isFlush = false;
+        this.form = this.params.item;
+    },
+    methods: {
+        /* 保存任务信息*/
+        save${className}() {
+            let self = this;
+            const loading = self.loadingOpen('.add');
+            save${className}(self.form).then((response) => {
+                if (response.flag) {
+                    self.params.isFlush = true;
+                    self.confirm(`${response.msg}，立即返回？`, self.goBack, null);
+                } else {
+                    self.messageError(response.msg);
+                }
+            }).finally(() => {
+                loading && loading.close();
+            });
+        },
+    },
+};
+</script>

@@ -1,0 +1,28 @@
+import request from '@/assets/js/config/request';
+
+/* 保存${tableText}*/
+export function save${className}(data) {
+    return request({
+        url: 'system/${variableName}/save${className}',
+        method: 'post',
+        data: data,
+    });
+}
+
+/* 删除${tableText}*/
+export function delete${className}(data) {
+    return request({
+        url: 'system/${variableName}/delete${className}',
+        method: 'post',
+        data: data,
+    });
+}
+
+/* 查询${tableText}*/
+export function select${className}(data) {
+    return request({
+        url: 'system/${variableName}/select${className}',
+        method: 'post',
+        data: data,
+    });
+}

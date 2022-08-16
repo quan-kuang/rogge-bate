@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.postgresql.DictMapper">
+
+    <!--定义dict表的查询SQL-->
+    <sql id="selectDictSql">
+        SELECT a.uuid, a.value, a.text, a.parent_id, a.parent_name, a.sort, a.status, a.remark, a.creator_id, a.creator_name, a.create_time, a.update_time
+    </sql>
+
+    <!--保存字典（主键存在则更新）-->
+    <insert id="saveDict" parameterType="com.loyer.modules.system.entity.Dict">
+        INSERT INTO dict (uuid, value, text, parent_id, parent_name, sort, status, remark, creator_id, creator_name)
+        VALUES (coalesce(#{uuid}, replace(((uuid_generate_v4())::CHARACTER VARYING)::TEXT, '-'::TEXT, ''::TEXT)), #{value}, #{text}, #{parentId}, #{parentName}, #{sort}, #{status}, #{remark}, #{params.userId}, #{params.userName})
+        ON CONFLICT(uuid) DO
+        UPDATE SET value = #{value}, text = #{text}, sort = #{sort}, status = #{status}, remark = #{remark}, update_time = now()
+    </insert>
+
+    <!--查询字典信息-->
+    <select id="selectDict" parameterType="com.loyer.modules.system.entity.Dict" resultType="com.loyer.modules.system.entity.Dict">
+        WITH RECURSIVE temp AS (
+        SELECT 1 AS level, a.* FROM dict a WHERE a.parent_id = CASE WHEN #{parentId} IS NULL THEN 'root' WHEN length(#{parentId}) = 0 THEN 'root' ELSE #{parentId} END
+        UNION ALL SELECT c.level + 1, b.* FROM dict b INNER JOIN temp c ON b.parent_id = c.uuid)
+        <include refid="selectDictSql"/>, a.level FROM temp a
+        <where>
+            <if test="status != null">AND a.status = #{status}</if>
+            <if test="params != null">
+                <if test="params.queryText != null and params.queryText != ''">AND (a.text ~ #{params.queryText} OR a.value ~ #{params.queryText} OR a.uuid ~ #{params.queryText})</if>
+            </if>
+        </where>
+        ORDER BY a.level, a.sort
+    </select>
+
+    <!--批量删除字典-->
+    <delete id="deleteDict">
+        DELETE FROM dict WHERE creator_id != 'root' AND uuid IN
+        <foreach collection="uuids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!--查询字典排序-->
+    <select id="selectDictSort" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT max(sort)FROM dict WHERE parent_id = #{parentId}
+    </select>
+
+    <!--字典级联查询-->
+    <select id="selectCascade" resultType="java.lang.String">
+        WITH RECURSIVE temp AS (
+        SELECT a.uuid, a.parent_id FROM dict a WHERE a.uuid IN
+        <foreach collection="uuids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        UNION ALL SELECT b.uuid, b.parent_id FROM dict b INNER JOIN temp c ON b.parent_id = c.uuid)
+        SELECT uuid FROM temp
+    </select>
+
+    <!--校验字典信息是否存在-->
+    <select id="checkDictExists" parameterType="com.loyer.modules.system.entity.Dict" resultType="java.lang.Integer">
+        SELECT count(*) FROM dict
+        <where>
+            <if test="uuid != null and uuid != ''">AND uuid = #{uuid}</if>
+            <if test="value != null and value != ''">AND value = #{value}</if>
+            <if test="parentId != null and parentId != ''">AND parent_id = #{parentId}</if>
+        </where>
+    </select>
+</mapper>

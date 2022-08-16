@@ -1,0 +1,2 @@
+clientUrl: 127.0.0.1
+eurekaUrl: http://admin:loyer.@127.0.0.1:9000/eureka/eureka/

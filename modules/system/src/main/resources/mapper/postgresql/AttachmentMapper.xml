@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.postgresql.AttachmentMapper">
+
+    <!--定义attachment表的查询SQL-->
+    <sql id="selectAttachmentSql">
+        SELECT a.uuid, a.name, a.type, a.mime, a.path, a.raw_size, a.size, a.base64, a.source, a.foreign_id, a.cite_type, a.creator_id, a.creator_name, a.create_dept_id, a.create_time, a.update_time
+    </sql>
+
+    <!--保存附件（主键存在则更新）-->
+    <insert id="saveAttachment" parameterType="com.loyer.modules.system.entity.Attachment">
+        INSERT INTO attachment (uuid, name, type, mime, path, raw_size, size, base64, source, foreign_id, cite_type, creator_id, creator_name, create_dept_id)
+        VALUES (coalesce(#{uuid}, replace(((uuid_generate_v4())::CHARACTER VARYING)::TEXT, '-'::TEXT, ''::TEXT)), #{name}, #{type}, #{mime}, #{path}, #{rawSize}, #{size}, #{base64}, #{source}, #{foreignId}, #{citeType}, #{params.userId}, #{params.userName}, #{params.userDeptId})
+        ON CONFLICT(uuid) DO UPDATE
+        <!--未传的参数不进行修改-->
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="type != null and type != ''">type = #{type},</if>
+            <if test="mime != null and mime != ''">mime = #{mime},</if>
+            <if test="path != null and path != ''">path = #{path},</if>
+            <if test="rawSize != null">raw_size = #{rawSize},</if>
+            <if test="size != null">size = #{size},</if>
+            <if test="base64 != null and base64 != ''">base64 = #{base64},</if>
+            <if test="source != null and source != ''">source = #{source},</if>
+            <if test="foreignId != null and foreignId != ''">foreign_id = #{foreignId},</if>
+            <if test="citeType != null and citeType != ''">cite_type = #{citeType},</if>
+            update_time = now(),
+        </trim>
+    </insert>
+
+    <!--查询附件-->
+    <select id="selectAttachment" parameterType="com.loyer.modules.system.entity.Attachment" resultType="com.loyer.modules.system.entity.Attachment">
+        <include refid="selectAttachmentSql"/>
+        FROM attachment a
+        <where>
+            <if test="uuid != null and uuid != ''">AND a.uuid = #{uuid}</if>
+            <if test="name != null and name != ''">AND a.name = #{name}</if>
+            <if test="type != null and type != ''">AND a.type = #{type}</if>
+            <if test="mime != null and mime != ''">AND a.mime ~ #{mime}</if>
+            <if test="path != null and path != ''">AND a.path = #{path}</if>
+            <if test="rawSize != null">AND a.raw_size = #{rawSize}</if>
+            <if test="size != null">AND a.size = #{size}</if>
+            <if test="base64 != null and base64 != ''">AND a.base64 = #{base64}</if>
+            <if test="source != null and source != ''">AND a.source = #{source}</if>
+            <if test="foreignId != null and foreignId != ''">AND a.foreign_id = #{foreignId}</if>
+            <if test="citeType != null and citeType != ''">AND a.cite_type = #{citeType}</if>
+            <if test="creatorId != null and creatorId != ''">AND a.creator_id = #{creatorId}</if>
+            <if test="creatorName != null and creatorName != ''">AND a.creator_name = #{creatorName}</if>
+            <if test="createDeptId != null and createDeptId != ''">create_dept_id = #{createDeptId},</if>
+            <if test="createTime != null">AND a.create_time = #{createTime}</if>
+            <if test="updateTime != null">AND a.update_time = #{updateTime}</if>
+            <!--数据权限过滤-->
+            <if test="params != null and params.isAdmin != true and params.permissionScope != 0">
+                <choose>
+                    <when test="params.permissionScope == 4">AND a.creator_id = ${params.scopeSql}</when>
+                    <otherwise>AND a.create_dept_id IN ${params.scopeSql}</otherwise>
+                </choose>
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <!--批量删除附件-->
+    <delete id="deleteAttachment">
+        DELETE FROM attachment WHERE uuid IN
+        <foreach collection="attachmentList" index="index" item="item" open="(" separator="," close=")">
+            #{item.uuid}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,74 @@
+/*图片上传*/
+.upload-demo {
+    margin: 10px 0;
+}
+
+/*拖拽框*/
+.upload-demo .el-upload-dragger {
+    background-color: #fff;
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    box-sizing: border-box;
+    width: 150px;
+    height: 150px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/*上传框*/
+.upload-demo .el-upload--picture-card {
+    background-color: #fbfdff;
+    border: 0 dashed #c0ccda;
+    border-radius: 6px;
+    box-sizing: border-box;
+    width: 150px;
+    height: 150px;
+    line-height: 146px;
+    vertical-align: top;
+}
+
+/*上传后图片展示框*/
+.upload-demo .el-upload-list--picture-card .el-upload-list__item {
+    overflow: hidden;
+    background-color: #fff;
+    border: 1px solid #c0ccda;
+    border-radius: 6px;
+    box-sizing: border-box;
+    width: 150px;
+    height: 150px;
+    margin: 0 8px 8px 0;
+    display: inline-block;
+}
+
+/*上传框加号标示*/
+.upload-demo .el-upload--picture-card i {
+    font-size: 30px;
+    color: #8c939d;
+}
+
+/*拖拽框云标示*/
+.upload-demo .el-upload-dragger .el-icon-upload {
+    font-size: 67px;
+    color: #C0C4CC;
+    margin: 16px 0 16px;
+    line-height: 100px;
+    border: none;
+    outline: none;
+}
+
+/*上传图片进度条*/
+.el-upload-list--picture-card .el-progress {
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    bottom: auto;
+    width: 125px;
+}
+
+/*上传图片进度条*/
+.el-progress .el-progress-circle {
+    height: 150px;
+    width: 150px;
+}

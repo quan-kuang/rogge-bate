@@ -1,0 +1,93 @@
+package com.loyer.modules.system.service.impl;
+
+import com.loyer.common.datasource.entity.PageResult;
+import com.loyer.common.datasource.utils.PageHelperUtil;
+import com.loyer.common.dedicine.entity.ApiResult;
+import com.loyer.common.security.annotation.PermissionAnnotation;
+import com.loyer.modules.system.entity.${className};
+import com.loyer.modules.system.mapper.postgresql.${className}Mapper;
+import com.loyer.modules.system.service.${className}Service;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.Map;
+
+/**
+ * @author kuangq
+ * @title ${className}ServiceImpl
+ * @description ${tableText}ServiceImpl
+ * @date ${dateTime}
+ */
+@Service
+public class ${className}ServiceImpl implements ${className}Service {
+
+    @Resource
+    private ${className}Mapper ${variableName}Mapper;
+
+    /**
+     * @param ${variableName}
+     * @return com.loyer.common.dedicine.entity.ApiResult
+     * @author kuangq
+     * @description 保存${tableText}
+     * @date ${dateTime}
+     */
+    @Override
+    public ApiResult save${className}(${className} ${variableName}) {
+        return ApiResult.success(${variableName}Mapper.save${className}(${variableName}));
+    }
+
+    /**
+     * @param ${variableName}
+     * @return com.loyer.common.dedicine.entity.ApiResult
+     * @author kuangq
+     * @description 查询${tableText}
+     * @date ${dateTime}
+     */
+    @Override
+    public ApiResult select${className}(${className} ${variableName}) {
+        //判断是否为分页查询
+        if (PageHelperUtil.isPaging(${variableName})) {
+            String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+            PageResult<${className}> pageResult = PageHelperUtil.pagingQuery(${variableName}Mapper, methodName, ${variableName});
+            return ApiResult.success(pageResult);
+        } else {
+            return ApiResult.success(${variableName}Mapper.select${className}(${variableName}));
+        }
+    }
+
+    /**
+     * @param ${primaryName}s
+     * @return com.loyer.common.dedicine.entity.ApiResult
+     * @author kuangq
+     * @description 删除${tableText}
+     * @date ${dateTime}
+     */
+    @Override
+    public ApiResult delete${className}(String... ${primaryName}s) {
+        return ApiResult.success(${variableName}Mapper.delete${className}(${primaryName}s));
+    }
+
+    /**
+     * @param ${variableName}
+     * @return com.loyer.common.dedicine.entity.ApiResult
+     * @author kuangq
+     * @description 新增${tableText}
+     * @date ${dateTime}
+     */
+    @Override
+    public ApiResult insert${className}(${className} ${variableName}) {
+        return ApiResult.success(${variableName}Mapper.insert${className}(${variableName}));
+    }
+
+    /**
+     * @param ${variableName}
+     * @return com.loyer.common.dedicine.entity.ApiResult
+     * @author kuangq
+     * @description 修改${tableText}
+     * @date ${dateTime}
+     */
+    @Override
+    public ApiResult update${className}(${className} ${variableName}) {
+        return ApiResult.success(${variableName}Mapper.update${className}(${variableName}));
+    }
+}

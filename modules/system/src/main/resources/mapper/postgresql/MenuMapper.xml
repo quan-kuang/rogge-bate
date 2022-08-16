@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.postgresql.MenuMapper">
+
+    <!--定义menu表的查询SQL-->
+    <sql id="selectMenuSql">
+        SELECT a.uuid, a.type, a.parent_id, a.parent_name, a.title, a.url, a.path, a.icon, a.name, a.redirect, a.sort, a.status, a.require_auth, a.hide, a.permission, a.remark, a.creator_id, a.creator_name, a.create_time, a.update_time
+    </sql>
+
+    <!--保存菜单（主键存在则更新）-->
+    <insert id="saveMenu" parameterType="com.loyer.common.core.entity.Menu">
+        INSERT INTO menu (uuid, type, parent_id, parent_name, title, url, path, icon, name, redirect, sort, status, require_auth, hide, permission, remark, creator_id, creator_name)
+        VALUES (coalesce(#{uuid}, replace(((uuid_generate_v4())::CHARACTER VARYING)::TEXT, '-'::TEXT, ''::TEXT)), #{type}, #{parentId}, #{parentName}, #{title}, #{url}, #{path}, #{icon}, #{name}, #{redirect}, #{sort}, #{status}, #{requireAuth}, #{hide}, #{permission}, #{remark}, #{params.userId}, #{params.userName})
+        ON CONFLICT(uuid) DO
+        UPDATE SET type = #{type}, parent_id = #{parentId}, parent_name = #{parentName}, title = #{title}, url = #{url}, path = #{path}, icon = #{icon}, name = #{name}, redirect = #{redirect}, sort = #{sort}, status = #{status}, require_auth = #{requireAuth}, hide = #{hide}, permission = #{permission}, remark = #{remark}, update_time = now()
+    </insert>
+
+    <!--根据权限查询菜单-->
+    <select id="selectMenu" parameterType="com.loyer.common.core.entity.Menu" resultType="com.loyer.common.core.entity.Menu">
+        WITH
+        <!--非管理员只允许查询自身拥有菜单以及自身或下级创建的菜单-->
+        <if test="params != null and params.isAdmin != null and params.isAdmin != true">
+            menu_ids AS (
+            SELECT a.uuid FROM menu a WHERE a.creator_id IN ${params.inUserIds} UNION DISTINCT
+            SELECT c.link_id FROM role b INNER JOIN role_link c ON b.uuid = c.role_id AND c.link_type = 'menu' WHERE b.status = TRUE AND b.uuid IN ${params.inRoleIds}
+            ),
+        </if>
+        menus AS (
+        WITH RECURSIVE temp AS (SELECT 1 AS level, a.* FROM menu a WHERE a.parent_id = 'root'
+        UNION ALL SELECT c.level + 1, b.* FROM menu b INNER JOIN temp c ON b.parent_id = c.uuid) SELECT * FROM temp)
+        <include refid="selectMenuSql"/>, a.level
+        FROM menus a
+        <where>
+            <if test="level != null and level != ''">AND a.level = #{level}</if>
+            <if test="uuid != null and uuid != ''">AND a.uuid = #{uuid}</if>
+            <if test="type != null and type != ''">AND a.type = #{type}</if>
+            <if test="parentId != null and parentId != ''">AND a.parent_id = #{parentId}</if>
+            <if test="parentName != null and parentName != ''">AND a.parent_name = #{parentName}</if>
+            <if test="title != null and title != ''">AND a.title = #{title}</if>
+            <if test="url != null and url != ''">AND a.url = #{url}</if>
+            <if test="path != null and path != ''">AND a.path = #{path}</if>
+            <if test="icon != null and icon != ''">AND a.icon = #{icon}</if>
+            <if test="name != null and name != ''">AND a.name = #{name}</if>
+            <if test="redirect != null and redirect != ''">AND a.redirect = #{redirect}</if>
+            <if test="sort != null">AND a.sort = #{sort}</if>
+            <if test="status != null">AND a.status = #{status}</if>
+            <if test="requireAuth != null">AND a.require_auth = #{requireAuth}</if>
+            <if test="hide != null">AND a.hide = #{hide}</if>
+            <if test="permission != null and permission != ''">AND a.permission = #{permission}</if>
+            <if test="remark != null and remark != ''">AND a.remark = #{remark}</if>
+            <if test="creatorId != null and creatorId != ''">AND a.creator_id = #{creatorId}</if>
+            <if test="createTime != null">AND a.create_time = #{createTime}</if>
+            <if test="updateTime != null">AND a.update_time = #{updateTime}</if>
+            <if test="params != null">
+                <if test="params.queryText != null and params.queryText != ''">AND (a.title ~ #{params.queryText} OR a.url ~ #{params.queryText} OR a.path ~ #{params.queryText})</if>
+                <if test="params.isAdmin != null and params.isAdmin != true">AND a.uuid IN (SELECT uuid FROM menu_ids)</if>
+            </if>
+        </where>
+        ORDER BY a.level, a.sort
+    </select>
+
+    <!--批量删除菜单-->
+    <delete id="deleteMenu">
+        DELETE FROM menu WHERE creator_id != 'root' AND uuid IN
+        <foreach collection="uuids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!--修改菜单信息-->
+    <update id="updateMenu" parameterType="com.loyer.common.core.entity.Menu">
+        UPDATE menu
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="type != null and type != ''">type = #{type},</if>
+            <if test="parentId != null and parentId != ''">parent_id = #{parentId},</if>
+            <if test="parentName != null and parentName != ''">parent_name = #{parentName},</if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="url != null and url != ''">url = #{url},</if>
+            <if test="path != null and path != ''">path = #{path},</if>
+            <if test="icon != null and icon != ''">icon = #{icon},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="redirect != null and redirect != ''">redirect = #{redirect},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="requireAuth != null">require_auth = #{requireAuth},</if>
+            <if test="hide != null">hide = #{hide},</if>
+            <if test="permission != null and permission != ''">permission = #{permission},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            update_time = now()
+        </trim>
+        WHERE uuid = #{uuid}
+    </update>
+
+    <!--查询菜单排序-->
+    <select id="selectMenuSort" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT max(sort)FROM menu WHERE parent_id = #{parentId}
+    </select>
+
+    <!--菜单级联查询-->
+    <select id="selectCascade" resultType="java.lang.String">
+        WITH RECURSIVE temp AS (
+        SELECT a.uuid, a.parent_id FROM menu a WHERE a.uuid IN
+        <foreach collection="uuids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        UNION ALL SELECT b.uuid, b.parent_id FROM menu b INNER JOIN temp c ON b.parent_id = c.uuid)
+        SELECT uuid FROM temp
+    </select>
+</mapper>

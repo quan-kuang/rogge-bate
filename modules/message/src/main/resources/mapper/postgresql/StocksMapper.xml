@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.message.mapper.postgresql.StocksMapper">
+
+    <!--定义stocks表的查询SQL-->
+    <sql id="selectStocksSql">
+        SELECT a.id, a.f2, a.f3, a.f4, a.f8, a.f9, a.f10, a.f12, a.f14, a.f17, a.f18, a.f20, a.f23, a.f100, a.f124, a.create_time
+    </sql>
+
+    <!--新增股票信息-->
+    <insert id="insertStocks">
+        INSERT INTO stocks (id, f2, f3, f4, f8, f9, f10, f12, f14, f17, f18, f20, f23, f100, f124) VALUES
+        <foreach collection="stocksList" index="index" item="item" open="(" separator="),(" close=")">
+            <if test="item.id == null">default,</if>
+            <if test="item.id != null">#{item.id},</if>
+            #{item.f2}, #{item.f3}, #{item.f4}, #{item.f8}, #{item.f9}, #{item.f10}, #{item.f12}, #{item.f14}, #{item.f17}, #{item.f18}, #{item.f20}, #{item.f23}, #{item.f100}, #{item.f124}
+        </foreach>
+    </insert>
+</mapper>

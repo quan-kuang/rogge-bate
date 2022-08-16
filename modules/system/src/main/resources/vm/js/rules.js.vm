@@ -1,0 +1,26 @@
+import verify from '@assets/js/util/verify';
+
+const rules = {
+    data() {
+        /* 空格校验*/
+        const checkBlank = (rule, value, callback) => {
+            if (verify.regularCheck(value, verify.regExpBlank)) {
+                return callback(new Error('不能包含空格'));
+            }
+            return callback();
+        };
+        return {
+            rules: {
+                #foreach (${fieldExplain} in ${fieldExplainList})
+    ${fieldExplain.javaName}: [
+                        {required: true, message: '请输入${fieldExplain.fieldText}', trigger: 'blur'},
+                        {validator: checkBlank, trigger: 'change'},
+                    ],
+                #end
+            },
+        };
+    },
+    methods: {},
+};
+
+export default rules;
