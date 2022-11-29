@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.postgresql.UserMapper">
+
+    <!--定义users表的查询SQL-->
+    <sql id="selectUserSql">
+        SELECT a.uuid, a.account, a.password, a.name, a.id_card, a.sex, a.birthday, a.phone, a.email, a.avatar, a.dept_id, a.auth, a.status, a.remark, a.creator_id, a.creator_name, a.create_time, a.update_time, a.login_time
+    </sql>
+
+    <!--保存用户信息（主键存在则更新）-->
+    <insert id="saveUser" parameterType="com.loyer.common.core.entity.User">
+        INSERT INTO users (uuid, account, password, name, id_card, sex, birthday, phone, email, avatar, dept_id, auth, status, remark, creator_id, creator_name)
+        VALUES (coalesce(#{uuid}, replace(((uuid_generate_v4())::CHARACTER VARYING)::TEXT, '-'::TEXT, ''::TEXT)), #{account}, #{password}, #{name}, #{idCard}, #{sex}, #{birthday}, #{phone}, #{email}, #{avatar}, #{deptId}, #{auth}, #{status}, #{remark}, #{params.userId}, #{params.userName})
+        ON CONFLICT(uuid) DO
+        UPDATE SET name = #{name}, id_card = #{idCard}, sex = #{sex}, birthday = #{birthday}, phone = #{phone}, email = #{email}, avatar = #{avatar}, dept_id = #{deptId}, auth = #{auth}, status = #{status}, remark = #{remark}, update_time = now()
+    </insert>
+
+    <!--查询用户信息-->
+    <select id="selectUser" parameterType="com.loyer.common.core.entity.User" resultType="com.loyer.common.core.entity.User">
+        <include refid="selectUserSql"/>, b.name AS deptName
+        FROM users a LEFT JOIN dept b ON a.dept_id = b.uuid
+        <where>
+            <if test="uuid != null and uuid != ''">AND a.uuid = #{uuid}</if>
+            <if test="account != null and account != ''">AND a.account = #{account}</if>
+            <if test="name != null and name != ''">AND a.name = #{name}</if>
+            <if test="idCard != null and idCard != ''">AND a.id_card = #{idCard}</if>
+            <if test="sex != null and sex != ''">AND a.sex = #{sex}</if>
+            <if test="birthday != null and birthday != ''">AND a.birthday = #{birthday}</if>
+            <if test="phone != null and phone != ''">AND a.phone = #{phone}</if>
+            <if test="email != null and email != ''">AND a.email = #{email}</if>
+            <if test="avatar != null and avatar != ''">AND a.avatar = #{avatar}</if>
+            <if test="deptId != null and deptId != ''">AND a.dept_id = #{deptId}</if>
+            <if test="auth != null">AND a.auth = #{auth}</if>
+            <if test="status != null">AND a.status = #{status}</if>
+            <if test="creatorId != null and creatorId != ''">AND a.creator_id = #{creatorId}</if>
+            <if test="creatorName != null and creatorName != ''">AND a.creator_name = #{creatorName}</if>
+            <if test="params != null">
+                <if test="params.queryText != null and params.queryText != ''">
+                    AND (a.account ~ #{params.queryText} OR a.name ~ #{params.queryText})
+                </if>
+                <if test="params.roleId != null and params.roleId != ''">
+                    AND exists(SELECT b.uuid FROM user_link b WHERE b.user_id = a.uuid AND b.role_id = #{params.roleId})
+                </if>
+                <!--数据权限过滤-->
+                <if test="params.isAdmin != true and params.permissionScope != 0">
+                    <choose>
+                        <when test="params.permissionScope == 4">AND a.uuid = ${params.scopeSql}</when>
+                        <otherwise>AND a.dept_id IN ${params.scopeSql}</otherwise>
+                    </choose>
+                </if>
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <!--批量删除用户信息-->
+    <delete id="deleteUser">
+        DELETE FROM users WHERE creator_id != 'root' AND uuid IN
+        <foreach collection="uuids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!--修改用户信息-->
+    <update id="updateUser" parameterType="com.loyer.common.core.entity.User">
+        UPDATE users
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="account != null and account != ''">account = #{account},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="idCard != null">id_card = #{idCard},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="birthday != null">birthday = #{birthday},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="auth != null">auth = #{auth},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="loginTime != null">login_time = #{loginTime},</if>
+        </trim>
+        WHERE uuid = #{uuid}
+    </update>
+
+    <!--保存用户关联角色信息-->
+    <insert id="saveUserLink" parameterType="com.loyer.common.core.entity.User">
+        INSERT INTO user_link (user_id, role_id)
+        <foreach collection="roleIds" index="index" item="item" open="SELECT" separator="UNION ALL  SELECT" close="">
+            #{uuid}, #{item}
+        </foreach>
+    </insert>
+
+    <!--查询用户关联角色ID-->
+    <select id="selectUserLink" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT role_id FROM user_link WHERE user_id = #{userId} ORDER BY role_id
+    </select>
+
+    <!--删除用户关联角色信息-->
+    <delete id="deleteUserLink" parameterType="java.lang.String">
+        DELETE FROM user_link WHERE user_id = #{userId}
+    </delete>
+</mapper>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="icon" th:href="@{/static/favicon/favicon.ico}" type="image/x-icon">
+    <link rel="styleSheet" th:href="@{/static/css/index.css}" type="text/css">
+    <script th:src="@{/static/js/index.js}"></script>
+</head>
+<body>
+<h1 th:text="${params.name}"></h1>
+<h2 th:text="${params.type}"></h2>
+</body>
+</html>

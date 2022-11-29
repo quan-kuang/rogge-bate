@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.postgresql.CrontabMapper">
+
+    <!--定义crontab表的查询SQL-->
+    <sql id="selectCrontabSql">
+        SELECT a.uuid, a.name, a.type, a.invoke_target, a.expression, a.concurrent, a.status, a.remark, a.creator_id, a.creator_name, a.create_time, a.update_time
+    </sql>
+
+    <!--保存定时任务（主键存在则更新）-->
+    <insert id="saveCrontab" parameterType="com.loyer.common.quartz.entity.Crontab">
+        INSERT INTO crontab (uuid, name, type, invoke_target, expression, concurrent, status, remark, creator_id, creator_name)
+        VALUES (coalesce(#{uuid}, replace(((uuid_generate_v4())::CHARACTER VARYING)::TEXT, '-'::TEXT, ''::TEXT)), #{name}, #{type}, #{invokeTarget}, #{expression}, #{concurrent}, #{status}, #{remark}, #{params.userId}, #{params.userName})
+        ON CONFLICT(uuid) DO
+        UPDATE SET name = #{name}, type = #{type}, invoke_target = #{invokeTarget}, expression = #{expression}, concurrent = #{concurrent}, status = #{status}, remark = #{remark}, update_time = now()
+    </insert>
+
+    <!--查询定时任务-->
+    <select id="selectCrontab" parameterType="com.loyer.common.quartz.entity.Crontab" resultType="com.loyer.common.quartz.entity.Crontab">
+        <include refid="selectCrontabSql"/>
+        FROM crontab a
+        <where>
+            <if test="uuid != null and uuid != ''">AND a.uuid = #{uuid}</if>
+            <if test="name != null and name != ''">AND a.name = #{name}</if>
+            <if test="type != null and type != ''">AND a.type = #{type}</if>
+            <if test="invokeTarget != null and invokeTarget != ''">AND a.invoke_target = #{invokeTarget}</if>
+            <if test="expression != null and expression != ''">AND a.expression = #{expression}</if>
+            <if test="concurrent != null">AND a.concurrent = #{concurrent}</if>
+            <if test="status != null">AND a.status = #{status}</if>
+            <if test="remark != null and remark != ''">AND a.remark = #{remark}</if>
+            <if test="creatorId != null and creatorId != ''">AND a.creator_id = #{creatorId}</if>
+            <if test="creatorName != null and creatorName != ''">AND a.creator_name = #{creatorName}</if>
+            <if test="createTime != null">AND a.create_time = #{createTime}</if>
+            <if test="updateTime != null">AND a.update_time = #{updateTime}</if>
+        </where>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <!--查询定时任务类型-->
+    <select id="selectCrontabType" resultType="com.loyer.common.quartz.entity.Crontab">
+        SELECT uuid, type
+        <include refid="inUuidSql"/>
+    </select>
+
+    <!--批量删除定时任务-->
+    <delete id="deleteCrontab">
+        DELETE
+        <include refid="inUuidSql"/>
+    </delete>
+
+    <!--uuids的过滤SQL-->
+    <sql id="inUuidSql">
+        FROM crontab WHERE uuid IN
+        <foreach collection="uuids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </sql>
+</mapper>

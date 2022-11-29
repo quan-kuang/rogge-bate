@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.postgresql.RoleMapper">
+
+    <!--定义role表的查询SQL-->
+    <sql id="selectRoleSql">
+        SELECT a.uuid, a.name, a.permission_type, a.status, a.remark, a.creator_id, a.creator_name, a.create_time, a.update_time
+    </sql>
+
+    <!--保存角色（主键存在则更新）-->
+    <insert id="saveRole" parameterType="com.loyer.common.core.entity.Role">
+        INSERT INTO role (uuid, name, permission_type, status, remark, creator_id, creator_name)
+        VALUES (coalesce(#{uuid}, replace(((uuid_generate_v4())::CHARACTER VARYING)::TEXT, '-'::TEXT, ''::TEXT)), #{name}, #{permissionType}, #{status}, #{remark}, #{params.userId}, #{params.userName})
+        ON CONFLICT(uuid) DO
+        UPDATE SET name = #{name}, permission_type = #{permissionType}, status = #{status}, remark = #{remark}, update_time = now()
+    </insert>
+
+    <!--根据权限查询角色-->
+    <select id="selectRole" parameterType="com.loyer.common.core.entity.Role" resultType="com.loyer.common.core.entity.Role">
+        <include refid="selectRoleSql"/>
+        FROM role a
+        <where>
+            <if test="uuid != null and uuid != ''">AND a.uuid = #{uuid}</if>
+            <if test="name != null and name != ''">AND a.name ~ #{name}</if>
+            <if test="permissionType != null and permissionType != ''">AND a.permission_type = #{permissionType}</if>
+            <if test="status != null">AND a.status = #{status}</if>
+            <!--非管理员只允许查询自身所属角色以及自身或下级创建的角色-->
+            <if test="params != null and params.isAdmin != null and params.isAdmin != true">
+                AND a.uuid IN ${params.inRoleIds} OR a.creator_id IN ${params.inUserIds}
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <!--批量删除角色-->
+    <delete id="deleteRole">
+        DELETE FROM role WHERE creator_id != 'root' AND uuid IN
+        <foreach collection="uuids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!--修改角色信息-->
+    <update id="updateRole" parameterType="com.loyer.common.core.entity.Role">
+        UPDATE role
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="permissionType != null and permissionType != ''">permission_type = #{permissionType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            update_time = now(),
+        </trim>
+        WHERE uuid = #{uuid}
+    </update>
+
+    <!--根据名称校验角色是否存在-->
+    <select id="checkRoleExists" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT count(*) FROM role WHERE name = #{name}
+    </select>
+
+    <!--保存角色关联菜单信息-->
+    <insert id="saveRoleLink" parameterType="com.loyer.common.core.entity.Role">
+        INSERT INTO role_link (role_id, link_id, link_type, checked)
+        <foreach collection="menuIds" index="index" item="item" open="SELECT" separator="UNION ALL  SELECT" close="">
+            #{uuid}, CASE WHEN position('@' IN #{item}) > 0 THEN substr(#{item}, 2) ELSE #{item} END, 'menu', CASE WHEN position('@' IN #{item}) > 0 THEN FALSE ELSE TRUE END
+        </foreach>
+        <if test="deptIds != null and deptIds.size() > 0">
+            UNION ALL
+            <foreach collection="deptIds" index="index" item="item" open="SELECT" separator="UNION ALL  SELECT" close="">
+                #{uuid}, #{item}, 'dept', TRUE
+            </foreach>
+        </if>
+    </insert>
+
+    <!--删除角色关联菜单信息-->
+    <delete id="deleteRoleLink" parameterType="java.lang.String">
+        DELETE FROM role_link WHERE role_id = #{roleId}
+    </delete>
+
+    <!--定义roleIds的过滤SQL-->
+    <sql id="filterRoleIds">
+        <choose>
+            <when test="roleIds != null and roleIds.length == 1">
+                = #{roleIds[0]}
+            </when>
+            <otherwise>
+                IN
+                <foreach collection="roleIds" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </otherwise>
+        </choose>
+    </sql>
+
+    <!--查询角色关联菜单/部门ID-->
+    <select id="selectRoleLink" resultType="java.lang.String">
+        SELECT link_id FROM role_link WHERE checked = TRUE AND link_type = #{linkType} AND role_id
+        <include refid="filterRoleIds"/>
+    </select>
+
+    <!--查询角色数据权限组-->
+    <select id="selectPermissions" resultType="java.lang.String">
+        SELECT permission_type FROM role WHERE uuid
+        <include refid="filterRoleIds"/>
+    </select>
+
+    <!--根据用户ID查询所属角色-->
+    <select id="selectRoleByUserId" parameterType="java.lang.String" resultType="com.loyer.common.core.entity.Role">
+        <include refid="selectRoleSql"/>
+        FROM role a INNER JOIN user_link b ON a.uuid = b.role_id
+        WHERE b.user_id = #{userId}
+    </select>
+</mapper>

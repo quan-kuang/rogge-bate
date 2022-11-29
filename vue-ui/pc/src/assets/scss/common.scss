@@ -1,0 +1,75 @@
+/*必选星号*/
+.required {
+    .el-form-item__label:before {
+        content: '*';
+        color: #F56C6C;
+        margin-right: 4px;
+    }
+}
+
+/*查询框*/
+.search-box {
+    text-align: left;
+    margin-bottom: 15px;
+
+    .el-input {
+        width: 250px;
+        margin-right: 20px;
+    }
+}
+
+/*表单输入框*/
+.el-form {
+    .el-input, .el-select, .el-date-editor .el-input__inner {
+        width: 250px;
+    }
+}
+
+/*设置树形下拉框*/
+.el-scrollbar .el-select-dropdown__wrap .el-scrollbar__view .el-select-dropdown__item {
+    height: auto;
+    overflow-y: hidden;
+    font-weight: normal;
+}
+
+/* 分页控件靠右*/
+.el-pagination-1 {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+}
+
+/* 分页控件居中*/
+.el-pagination-2 {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/*表格样式*/
+.el-table-custom {
+    position: revert;
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+    }
+
+    tr {
+        border-bottom: 1px solid #dfe6ec;
+    }
+
+    th, td {
+        padding: 10px;
+    }
+
+    .text-danger {
+        font-weight: bold;
+        color: #ed5565;
+    }
+}

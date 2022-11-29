@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.postgresql.LogMapper">
+
+    <!--定义operate_log表的查询SQL-->
+    <sql id="selectOperateLogSql">
+        SELECT a.uuid,
+               a.server_ip,
+               a.client_ip,
+               a.url,
+               a.type,
+               a.path,
+               a.method,
+               a.in_args,
+               a.out_args,
+               a.title,
+               a.creator_id,
+               a.creator_name,
+               a.create_dept_id,
+               a.status,
+               a.elapsed_time,
+               a.remark,
+               a.create_time
+    </sql>
+
+    <!--定义operate_log表的过滤SQL-->
+    <sql id="filterSql">
+        <where>
+            <if test="uuid != null and uuid != ''">AND a.uuid = #{uuid}</if>
+            <if test="serverIp != null and serverIp != ''">AND a.server_ip = #{serverIp}</if>
+            <if test="clientIp != null and clientIp != ''">AND a.client_ip = #{clientIp}</if>
+            <if test="url != null and url != ''">AND a.url = #{url}</if>
+            <if test="type != null and type != ''">AND a.type = #{type}</if>
+            <if test="path != null and path != ''">AND a.path = #{path}</if>
+            <if test="method != null and method != ''">AND a.method = #{method}</if>
+            <if test="inArgs != null and inArgs != ''">AND a.in_args = #{inArgs}</if>
+            <if test="outArgs != null and outArgs != ''">AND a.out_args = #{outArgs}</if>
+            <if test="title != null and title != ''">AND a.title = #{title}</if>
+            <if test="creatorId != null and creatorId != ''">AND a.creator_id = #{creatorId}</if>
+            <if test="creatorName != null and creatorName != ''">AND a.creator_name = #{creatorName}</if>
+            <if test="createDeptId != null and createDeptId != ''">AND a.create_dept_id = #{createDeptId}</if>
+            <if test="status != null">AND a.status = #{status}</if>
+            <if test="elapsedTime != null">AND a.elapsed_time = #{elapsedTime}</if>
+            <if test="startTime != null and startTime != ''">AND to_char(a.create_time, 'YYYY-MM-DD HH24:MI:SS') &gt;= substr(#{startTime}, 1, 19)</if>
+            <if test="endTime != null and endTime != ''">AND to_char(a.create_time, 'YYYY-MM-DD HH24:MI:SS') &lt;= substr(#{endTime}, 1, 19)</if>
+            <if test="params != null">
+                <if test="params.queryText != null and params.queryText != ''">AND (a.server_ip ~ #{params.queryText} OR a.client_ip ~ #{params.queryText}
+                    OR a.title ~ #{params.queryText} OR a.method ~ #{params.queryText}OR a.creator_name ~ #{params.queryText})
+                </if>
+                <!--数据权限过滤-->
+                <if test="params.isAdmin != true and params.permissionScope != 0">
+                    <choose>
+                        <when test="params.permissionScope == 4">AND a.creator_id = ${params.scopeSql}</when>
+                        <otherwise>AND a.create_dept_id IN ${params.scopeSql}</otherwise>
+                    </choose>
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <!--新增接口日志表信息-->
+    <insert id="insertOperateLog" parameterType="com.loyer.common.core.entity.OperateLog">
+        INSERT INTO operate_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uuid != null and uuid != ''">uuid,</if>
+            <if test="serverIp != null and serverIp != ''">server_ip,</if>
+            <if test="clientIp != null and clientIp != ''">client_ip,</if>
+            <if test="url != null and url != ''">url,</if>
+            <if test="type != null and type != ''">type,</if>
+            <if test="path != null and path != ''">path,</if>
+            <if test="method != null and method != ''">method,</if>
+            <if test="inArgs != null and inArgs != ''">in_args,</if>
+            <if test="outArgs != null and outArgs != ''">out_args,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="creatorId != null and creatorId != ''">creator_id,</if>
+            <if test="creatorName != null and creatorName != ''">creator_name,</if>
+            <if test="createDeptId != null and createDeptId != ''">create_dept_id,</if>
+            <if test="status != null">status,</if>
+            <if test="elapsedTime != null">elapsed_time,</if>
+            <if test="remark != null and remark != ''">remark,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uuid != null and uuid != ''">#{uuid},</if>
+            <if test="serverIp != null and serverIp != ''">#{serverIp},</if>
+            <if test="clientIp != null and clientIp != ''">#{clientIp},</if>
+            <if test="url != null and url != ''">#{url},</if>
+            <if test="type != null and type != ''">#{type},</if>
+            <if test="path != null and path != ''">#{path},</if>
+            <if test="method != null and method != ''">#{method},</if>
+            <if test="inArgs != null and inArgs != ''">#{inArgs},</if>
+            <if test="outArgs != null and outArgs != ''">#{outArgs},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="creatorId != null and creatorId != ''">#{creatorId},</if>
+            <if test="creatorName != null and creatorName != ''">#{creatorName},</if>
+            <if test="createDeptId != null and createDeptId != ''">#{createDeptId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="elapsedTime != null">#{elapsedTime},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <!--查询接口日志表-->
+    <select id="selectOperateLog" parameterType="com.loyer.common.core.entity.OperateLog" resultType="com.loyer.common.core.entity.OperateLog">
+        SELECT a.uuid, a.server_ip, a.client_ip, a.url, a.type, a.path, a.method, a.title, a.creator_id, a.creator_name, a.create_dept_id, a.status, a.elapsed_time, a.remark, a.create_time
+        FROM operate_log a
+        <include refid="filterSql"/>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <!--查询接口日志参数信息-->
+    <select id="selectOperateArgs" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT a.in_args, a.out_args
+        FROM operate_log a
+        WHERE a.uuid = #{uuid}
+    </select>
+
+    <!--查询接口日志数据总条数-->
+    <select id="selectOperateLogTotal" parameterType="com.loyer.common.core.entity.OperateLog" resultType="java.lang.Integer">
+        SELECT count(*) FROM operate_log a
+        <include refid="filterSql"/>
+    </select>
+
+    <!--查询接口日志数据集-->
+    <select id="selectOperateLogList" parameterType="com.loyer.common.core.entity.OperateLog" resultType="com.loyer.common.core.entity.OperateLog">
+        <include refid="selectOperateLogSql"/>
+        FROM operate_log a
+        <include refid="filterSql"/>
+        ORDER BY a.create_time DESC
+        LIMIT ${pageSize} OFFSET (${pageNum} - 1) * ${pageSize}
+    </select>
+
+    <!--日志周统计-->
+    <select id="logWeekStat" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT a.date, a.week, count(b.uuid)
+        FROM get_current_week(#{currentDate}) a LEFT JOIN operate_log b ON a.date = to_char(b.create_time, 'YYYY-MM-DD')
+        <!--数据权限过滤-->
+        <if test="isAdmin != true and permissionScope != 0">
+            <choose>
+                <when test="permissionScope == 4">AND b.creator_id = ${scopeSql}</when>
+                <otherwise>AND b.create_dept_id IN ${scopeSql}</otherwise>
+            </choose>
+        </if>
+        GROUP BY a.week, a.date
+        ORDER BY a.date
+    </select>
+
+    <!--批量删除日志记录-->
+    <delete id="deleteOperateLog">
+        DELETE FROM operate_log WHERE uuid IN
+        <foreach collection="uuids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

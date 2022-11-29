@@ -1,0 +1,38 @@
+.roof {
+    /*顶部导航背景色*/
+    --header-base: rgb(38, 47, 62);
+}
+
+.logo {
+    /*左上方logo背景色*/
+    --header-logo: rgb(38, 47, 62);
+}
+
+.left, .el-menu {
+    /*菜单背景色*/
+    --menu-base: rgb(30, 34, 45);
+    /*菜单字体颜色*/
+    --menu-base-text: rgb(193, 198, 200);
+    /*菜单选中字体颜色*/
+    --menu-base-text-active: rgb(255, 255, 255);
+    /*悬浮菜单节点背景色*/
+    --menu-title-hover: rgb(38, 47, 62);
+    /*悬浮菜单背景色*/
+    --menu-item-hover: rgb(38, 47, 62);
+    /*选中菜单背景色*/
+    --menu-item-active: rgb(0, 110, 255);
+}
+
+.tabs {
+    /*导航标签背景色*/
+    --tabs-base: rgb(255, 255, 255);
+    /*悬浮导航标签背景色*/
+    --tabs-item-hover: rgb(0, 110, 255);
+    /*选中导航标签背景色*/
+    --tabs-item-active: rgb(38, 47, 62);
+}
+
+.aside, .right {
+    /*内容主体背景色*/
+    --main-base: rgb(242, 242, 242);
+}

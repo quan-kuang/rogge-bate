@@ -1,0 +1,24 @@
+package com.loyer.modules.system.service;
+
+import com.loyer.common.core.entity.${className};
+import com.loyer.common.dedicine.entity.ApiResult;
+
+import java.util.Map;
+
+/**
+ *  ${tableText}Service
+ * @author kuangq
+ * @date ${dateTime}
+ */
+public interface ${className}Service {
+
+    ApiResult save${className}(${className} ${variableName});
+
+    ApiResult select${className}(${className} ${variableName});
+
+    ApiResult delete${className}(String... ${primaryName}s);
+
+    ApiResult insert${className}(${className} ${variableName});
+
+    ApiResult update${className}(${className} ${variableName});
+}

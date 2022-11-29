@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <description>安全模块</description>
+
+    <groupId>com.loyer.common</groupId>
+    <artifactId>security</artifactId>
+
+    <parent>
+        <groupId>com.loyer</groupId>
+        <artifactId>common</artifactId>
+        <version>2.0</version>
+    </parent>
+
+    <dependencies>
+        <!--核心模块-->
+        <dependency>
+            <groupId>com.loyer.common</groupId>
+            <artifactId>core</artifactId>
+            <version>2.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--缓存模块-->
+        <dependency>
+            <groupId>com.loyer.common</groupId>
+            <artifactId>redis</artifactId>
+            <version>2.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--接口模块-->
+        <dependency>
+            <groupId>com.loyer.common</groupId>
+            <artifactId>apis</artifactId>
+            <version>2.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--cloud-security-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-security</artifactId>
+        </dependency>
+
+        <!--token生成解析器-->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+    </dependencies>
+</project>

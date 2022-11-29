@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.postgresql.${className}Mapper">
+
+    <!--定义${tableName}表的查询SQL-->
+    <sql id="select${className}Sql">
+        SELECT #foreach(${fieldExplain} in ${fieldExplainList})a.${fieldExplain.fieldName}#if(${velocityCount} != ${fieldExplainList.size()}), #end#end
+
+    </sql>
+
+    <!--保存${tableText}（主键存在则更新）-->
+    <insert id="save${className}" parameterType="com.loyer.modules.system.entity.${className}">
+        INSERT INTO ${tableName} (#foreach(${fieldExplain} in ${fieldExplainList})${fieldExplain.fieldName}#if(${velocityCount} != ${fieldExplainList.size()}), #end#end)
+        VALUES (#foreach(${fieldExplain} in ${fieldExplainList})#if(${fieldExplain.fieldName} == "${primaryKey}")coalesce(#{${fieldExplain.javaName}}, replace(((uuid_generate_v4())::CHARACTER VARYING)::TEXT, '-'::TEXT, ''::TEXT))#else#{${fieldExplain.javaName}}#end#if($velocityCount != ${fieldExplainList.size()}), #end#end)
+        ON CONFLICT(${primaryKey}) DO
+        UPDATE SET #foreach(${fieldExplain} in ${fieldExplainList})#if(${fieldExplain.fieldName} != "${primaryKey}")${fieldExplain.fieldName} = #{${fieldExplain.javaName}}#if($velocityCount != ${fieldExplainList.size()}), #end#end#end
+
+    </insert>
+
+    <!--保存${tableText}（主键存在则更新）-->
+    <insert id="save${className}" parameterType="com.loyer.modules.system.entity.${className}">
+        WITH "temp" AS (UPDATE ${tableName}
+        <trim prefix="SET" suffixOverrides=",">
+#foreach(${fieldExplain} in ${fieldExplainList})
+            <if test="${fieldExplain.javaName} != null#if(${fieldExplain.javaType} == 'String' ) and ${fieldExplain.javaName} != ''#end">${fieldExplain.fieldName} = #{${fieldExplain.javaName}},</if>
+#end
+        </trim>
+        WHERE ${primaryKey} = #{${primaryName}} RETURNING *)
+        INSERT INTO ${tableName} (#foreach(${fieldExplain} in ${fieldExplainList})${fieldExplain.fieldName}#if(${velocityCount} != ${fieldExplainList.size()}), #end#end)
+        SELECT #foreach(${fieldExplain} in ${fieldExplainList})#if(${fieldExplain.fieldName} == "${primaryKey}")coalesce(#{${fieldExplain.javaName}}, replace(((uuid_generate_v4())::CHARACTER VARYING)::TEXT, '-'::TEXT, ''::TEXT))#else#{${fieldExplain.javaName}}#end#if($velocityCount != ${fieldExplainList.size()}), #end#end
+
+        WHERE (SELECT count(*) FROM temp) = 0
+   </insert>
+
+    <!--查询${tableText}-->
+    <select id="select${className}" parameterType="com.loyer.modules.system.entity.${className}" resultType="com.loyer.modules.system.entity.${className}">
+        <include refid="select${className}Sql"/>
+        FROM ${tableName} a
+        <where>
+#foreach(${fieldExplain} in ${fieldExplainList})
+            <if test="${fieldExplain.javaName} != null#if(${fieldExplain.javaType} == 'String' ) and ${fieldExplain.javaName} != ''#end">AND a.${fieldExplain.fieldName} = #{${fieldExplain.javaName}}</if>
+#end
+            <if test="params != null"></if>
+        </where>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <!--批量删除${tableText}-->
+    <delete id="delete${className}">
+        DELETE FROM ${tableName} WHERE ${primaryKey} IN
+        <foreach collection="${primaryName}s" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!--新增${tableText}-->
+    <insert id="insert${className}" parameterType="com.loyer.modules.system.entity.${className}">
+        INSERT INTO ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+#foreach(${fieldExplain} in ${fieldExplainList})
+            <if test="${fieldExplain.javaName} != null#if(${fieldExplain.javaType} == 'String' ) and ${fieldExplain.javaName} != ''#end">${fieldExplain.fieldName},</if>
+#end
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+#foreach(${fieldExplain} in ${fieldExplainList})
+            <if test="${fieldExplain.javaName} != null#if(${fieldExplain.javaType} == 'String' ) and ${fieldExplain.javaName} != ''#end">#{${fieldExplain.javaName}},</if>
+#end
+        </trim>
+    </insert>
+
+    <!--修改${tableText}-->
+    <update id="update${className}" parameterType="com.loyer.modules.system.entity.${className}">
+        UPDATE ${tableName}
+        <trim prefix="SET" suffixOverrides=",">
+#foreach(${fieldExplain} in ${fieldExplainList})
+            #if(${fieldExplain.fieldName} != "${primaryKey}")<if test="${fieldExplain.javaName} != null#if(${fieldExplain.javaType} == 'String' ) and ${fieldExplain.javaName} != ''#end">${fieldExplain.fieldName} = #{${fieldExplain.javaName}},</if>#end
+
+#end
+        </trim>
+        WHERE ${primaryKey} = #{${primaryName}}
+    </update>
+</mapper>

@@ -1,0 +1,3 @@
+clientUrl: 10.181.32.22
+eurekaUrl: http://admin:loyer.@10.181.32.22:9000/eureka/eureka/
+publicUrl: http://loyer.com/

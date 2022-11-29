@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <description>消息队列</description>
+
+    <groupId>com.loyer.common</groupId>
+    <artifactId>rabbitmq</artifactId>
+
+    <parent>
+        <groupId>com.loyer</groupId>
+        <artifactId>common</artifactId>
+        <version>2.0</version>
+    </parent>
+
+    <dependencies>
+        <!--核心模块-->
+        <dependency>
+            <groupId>com.loyer.common</groupId>
+            <artifactId>core</artifactId>
+            <version>2.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--通讯模块-->
+        <dependency>
+            <groupId>com.loyer.common</groupId>
+            <artifactId>websocket</artifactId>
+            <version>2.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--消息中间件-RabbitMq-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+            <version>${spring-boot-starter-amqp.version}</version>
+        </dependency>
+    </dependencies>
+</project>

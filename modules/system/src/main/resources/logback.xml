@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <!--日志存放路径-->
+    <property name="log.path" value="logs/system"/>
+
+    <!--将状态信息监听器设置为无操作监听器，去除启动时的冗余输出-->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <!-- 彩色日志依赖的渲染类 -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+
+    <!--控制台彩色日志格式-->
+    <property name="log.format.console"
+              value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%0.30t]){faint} %clr(%-0.50logger{50}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+    <!--文件输出日志格式-->
+    <property name="log.format.file" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %level [%thread] %logger{50} [%method, %line] %msg%n"/>
+
+    <!--系统日志级别控制-->
+    <logger name="com.loyer.modules.system" level="debug"/>
+    <!--忽略devtools热部署检测-->
+    <logger name="org.springframework.boot.devtools.env.DevToolsPropertyDefaultsPostProcessor" level="warn"/>
+    <!--忽略eureka心跳检测-->
+    <logger name="com.netflix.discovery.shared.resolver.aws.ConfigClusterResolver" level="warn"/>
+    <!--忽略DiscoveryClient打印-->
+    <logger name="com.netflix.discovery.DiscoveryClient" level="warn"/>
+    <!--忽略DiscoveryJerseyProvider打印-->
+    <logger name="com.netflix.discovery.provider.DiscoveryJerseyProvider" level="warn"/>
+    <!--忽略DefaultSecurityFilterChain打印-->
+    <logger name="org.springframework.security.web.DefaultSecurityFilterChain" level="warn"/>
+    <!--忽略EndpointId警告-->
+    <logger name="org.springframework.boot.actuate.endpoint.EndpointId" level="error"/>
+    <!--忽略SpringCloudSecurityAutoConfiguration警告-->
+    <logger name="org.springframework.cloud.security.oauth2.SpringCloudSecurityAutoConfiguration" level="error"/>
+    <!--忽略BlockingLoadBalancerClientAutoConfiguration的推荐警告-->
+    <logger name="org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration" level="error"/>
+    <!--忽略Redis心跳警告-->
+    <logger name="io.lettuce.core.protocol" level="warn"/>
+
+    <!--忽略Spring Data repository扫描-->
+    <logger name="org.springframework.data.repository.config.RepositoryConfigurationDelegate" level="warn"/>
+    <!--忽略discard long time none received connection警告-->
+    <logger name="com.alibaba.druid.pool.DruidAbstractDataSource" level="error"/>
+    <!--忽略No mapping警告-->
+    <logger name="org.springframework.web.servlet.PageNotFound" level="error"/>
+    <!--忽略No MyBatis mapper was found警告-->
+    <logger name="org.mybatis.spring.mapper.ClassPathMapperScanner" level="error"/>
+    <!--忽略Spring boot admin的方法扫描-->
+    <logger name="springfox.documentation.spring.web.readers.operation.CachingOperationNameGenerator" level="warn"/>
+
+    <!--忽略quartz启动日志输出-->
+    <logger name="org.quartz.core.QuartzScheduler" level="warn"/>
+    <!--忽略操作日志保存的SQL-->
+    <logger name="com.loyer.modules.system.mapper.postgresql.LogMapper.insertOperateLog" level="info"/>
+
+    <!--控制台输出设置-->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${log.format.console}</pattern>
+        </encoder>
+    </appender>
+
+    <!--文件日志输出-->
+    <appender name="fileInfo" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--输出位置和日志格式-->
+        <file>${log.path}/info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${log.format.file}</pattern>
+        </encoder>
+
+        <!--配置过滤器，只记录INFO级别信息-->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <!--日志记录器的滚动策略，按日期，按大小记录（保留10天）-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/info.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!--异常日志输出-->
+    <appender name="fileError" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--输出位置和日志格式-->
+        <file>${log.path}/error.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${log.format.file}</pattern>
+        </encoder>
+
+        <!--配置过滤器，只记录INFO级别信息-->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <!--日志记录器的滚动策略，按日期，按大小记录（保留10天）-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!--日志记录-->
+    <root level="info">
+        <appender-ref ref="console"/>
+        <appender-ref ref="fileInfo"/>
+        <appender-ref ref="fileError"/>
+    </root>
+</configuration>

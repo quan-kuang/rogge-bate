@@ -1,0 +1,23 @@
+package com.loyer.modules.system.mapper.postgresql;
+
+import com.loyer.modules.system.entity.${className};
+
+import java.util.List;
+
+/**
+ *  ${tableText}Mapper
+ * @author kuangq
+ * @date ${dateTime}
+ */
+public interface ${className}Mapper {
+
+    Integer save${className}(${className} ${variableName});
+
+    List<${className}> select${className}(${className} ${variableName});
+
+    Integer delete${className}(String... ${primaryName}s);
+
+    Integer insert${className}(${className} ${variableName});
+
+    Integer update${className}(${className} ${variableName});
+}

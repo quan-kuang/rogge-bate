@@ -1,0 +1,70 @@
+package com.loyer.modules.system.controller;
+
+import com.loyer.common.core.entity.${className};
+import com.loyer.common.core.annotation.OperateLogAnnotation;
+import com.loyer.common.security.annotation.ThrottlingAnnotation;
+import com.loyer.modules.system.service.${className}Service;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.loyer.common.dedicine.entity.ApiResult;
+
+import javax.annotation.Resource;
+
+/**
+ *  ${tableText}Controller
+ * @author kuangq
+ * @date ${dateTime}
+ */
+@Api(tags = "${tableText}模块")
+@RestController
+@RequestMapping("${variableName}")
+public class ${className}Controller {
+
+    @Resource
+    private ${className}Service ${variableName}Service;
+
+    @OperateLogAnnotation
+    @PreAuthorize("@pu.hasAnyPermissions('${variableName}:insert','${variableName}:update')")
+    @ApiOperation("保存${tableText}")
+    @PostMapping("save${className}")
+    public ApiResult save${className}(@RequestBody ${className} ${variableName}) {
+        return ${variableName}Service.save${className}(${variableName});
+    }
+
+    @OperateLogAnnotation
+    @PreAuthorize("@pu.hasAllPermissions('${variableName}:select')")
+    @ApiOperation("查询${tableText}")
+    @PostMapping("select${className}")
+    public ApiResult select${className}(@RequestBody ${className} ${variableName}) {
+        return ${variableName}Service.select${className}(${variableName});
+    }
+
+    @OperateLogAnnotation
+    @PreAuthorize("@pu.hasAllPermissions('${variableName}:delete')")
+    @ApiOperation("删除${tableText}")
+    @PostMapping("delete${className}")
+    public ApiResult delete${className}(@RequestBody String[] ${primaryName}s) {
+        return ${variableName}Service.delete${className}(${primaryName}s);
+    }
+
+    @OperateLogAnnotation
+    @PreAuthorize("@pu.hasAllPermissions('${variableName}:insert')")
+    @ApiOperation("新增${tableText}")
+    @PostMapping("insert${className}")
+    public ApiResult insert${className}(@RequestBody ${className} ${variableName}) {
+        return ${variableName}Service.insert${className}(${variableName});
+    }
+
+    @OperateLogAnnotation
+    @PreAuthorize("@pu.hasAllPermissions('${variableName}:update')")
+    @ApiOperation("修改${tableText}")
+    @PostMapping("update${className}")
+    public ApiResult update${className}(@RequestBody ${className} ${variableName}) {
+        return ${variableName}Service.update${className}(${variableName});
+    }
+}

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width,initial-scale=1.0" name="viewport">
+    <title>罗格贝特</title>
+    <style type="text/css">
+        /*屏幕撑满*/
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        /*加载动画盒子*/
+        .loading-box {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 666;
+            /*background-image: url(../src/assets/svg/loading.svg);*/
+            /*background-repeat: no-repeat;*/
+            /*background-position: center center;*/
+            /*background-size: 100px 100px;*/
+        }
+
+        /*加载动画横线*/
+        .loading-box .loader {
+            display: block;
+            position: relative;
+            z-index: 666;
+            top: 35%;
+            left: 50%;
+            width: 150px;
+            height: 150px;
+            margin-left: -75px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: crimson;
+            animation: spin 2s linear infinite;
+            -webkit-animation: spin 2s linear infinite;
+        }
+
+        /*加载动画横线*/
+        .loading-box .loader:before {
+            content: "";
+            position: absolute;
+            z-index: 666;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: forestgreen;
+            animation: spin 3s linear infinite;
+            -webkit-animation: spin 3s linear infinite;
+        }
+
+        /*加载动画横线*/
+        .loading-box .loader:after {
+            content: "";
+            position: absolute;
+            z-index: 666;
+            top: 13px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: dodgerblue;
+            animation: spin 1.5s linear infinite;
+            -webkit-animation: spin 1.5s linear infinite;
+        }
+
+        /*加载文字*/
+        .loading-box .title {
+            position: absolute;
+            text-align: center;
+            width: 100%;
+            top: 60%;
+            font-size: 18px;
+            color: lightgray;
+        }
+
+        /*加载横线旋转动画*/
+        @keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+                -ms-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+                -ms-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
+        }
+
+        /*Safari与Chrome*/
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+                -ms-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+                -ms-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
+        }
+
+        /*开屏动画效果*/
+        .loading-box .loader-section {
+            position: fixed;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: rgb(30, 34, 45);
+            -webkit-transform: translateX(0);
+            -ms-transform: translateX(0);
+            transform: translateX(0);
+        }
+
+        .loading-box .loader-section.section-left {
+            left: 0;
+        }
+
+        .loading-box .loader-section.section-right {
+            right: 0;
+        }
+
+        .loaded .loading-box .loader-section.section-left {
+            -webkit-transform: translateX(-100%);
+            -ms-transform: translateX(-100%);
+            transform: translateX(-100%);
+            -webkit-transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+            transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+        }
+
+        .loaded .loading-box .loader-section.section-right {
+            -webkit-transform: translateX(100%);
+            -ms-transform: translateX(100%);
+            transform: translateX(100%);
+            -webkit-transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+            transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+        }
+
+        .loaded .loader {
+            opacity: 0;
+            -webkit-transition: all 0.3s ease-out;
+            transition: all 0.3s ease-out;
+        }
+
+        .loaded .loading-box {
+            visibility: hidden;
+            -webkit-transform: translateY(-100%);
+            -ms-transform: translateY(-100%);
+            transform: translateY(-100%);
+            -webkit-transition: all 0.3s 1s ease-out;
+            transition: all 0.3s 1s ease-out;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="loading-box">
+        <div class="loader"></div>
+        <div class="loader-section section-left"></div>
+        <div class="loader-section section-right"></div>
+        <div class="title">系统正在加载，请等待......</div>
+    </div>
+</div>
+<script type="text/javascript">
+    window.onload = () => {
+        setTimeout(() => {
+            document.body.classList.add('loaded');
+        }, 0);
+    };
+</script>
+</body>
+</html>

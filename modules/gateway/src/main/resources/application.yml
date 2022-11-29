@@ -1,0 +1,57 @@
+#server设置
+server:
+  #端口号
+  port: 9010
+#spring设置
+spring:
+  #环境设置
+  profiles:
+    active: dev
+  #服务名称
+  application:
+    name: gateway
+  #servlet配置
+  servlet:
+    multipart:
+      #设置单个文件的大小
+      max-file-size: 20MB
+      #设置单次请求的文件的总大小
+      max-request-size: 100MB
+  #gateway配置
+  cloud:
+    gateway:
+      httpclient:
+        #链接获取超时时间，单位毫秒
+        connect-timeout: 3000
+        #接口响应超时时间，单位毫秒
+        response-timeout: 15000
+#eureka设置
+eureka:
+  client:
+    #是否向注册中心注册服务
+    register-with-eureka: true
+    #是否向注册中心发现服务
+    fetch-registry: true
+    service-url:
+      #注册中心地址，设置多服务器注册中心时需要将多个ip用‘,’分隔
+      defaultZone: ${eurekaUrl}
+  instance:
+    #将自己的IP注册到eureka
+    prefer-ip-address: true
+    #注册的ip地址，不指定的话会自己寻找
+    ip-address: ${clientUrl}
+    #客户端向服务端发送心跳的时间间隔，单位为秒，默认30
+    lease-renewal-interval-in-seconds: 10
+    #服务端在收到最后一次心跳之后等待的时间上限，单位为秒，超过则剔除，默认90
+    lease-expiration-duration-in-seconds: 30
+#健康检测
+management:
+  endpoints:
+    web:
+      exposure:
+        #通过HTTP公开所有的端点，默认是info,health
+        include: '*'
+  endpoint:
+    health:
+      #显示完整信息，默认是never
+      show-details: always

@@ -1,0 +1,6 @@
+{
+    "plugins": [
+        // 按需加载,
+        "syntax-dynamic-import"
+    ]
+}

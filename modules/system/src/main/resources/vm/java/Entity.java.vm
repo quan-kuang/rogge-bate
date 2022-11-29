@@ -1,0 +1,28 @@
+package com.loyer.modules.system.entity;
+
+import com.loyer.common.core.entity.BaseEntity;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
+
+/**
+ *  ${tableText}
+ * @author kuangq
+ * @date ${dateTime}
+ */
+@Data
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+@ApiModel("${tableText}实体类")
+public class ${className} extends BaseEntity {
+    #foreach (${fieldExplain} in ${fieldExplainList})
+
+    @ApiModelProperty("${fieldExplain.fieldText}")
+    private ${fieldExplain.javaType} ${fieldExplain.javaName};
+    #end
+
+}

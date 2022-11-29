@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSSH2</title>
+    <style>
+        html, body {
+            background-color: #000;
+            height: 100%;
+            margin: 0;
+        }
+
+        .dropup-content {
+            display: none;
+        }
+
+        /*滚动条整体部分*/
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        /*滚动条的轨道*/
+        ::-webkit-scrollbar-track {
+            /*background: rgb(239, 239, 239);*/
+            border-radius: 2px;
+        }
+
+        /*滚动条里面的小方块*/
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 148, 148, 0.33);
+            border-radius: 10px;
+        }
+
+        /*鼠标悬停滚动条里面的小方块*/
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 148, 148, 0.66);
+        }
+
+        /*两个滚动条的交汇处*/
+        ::-webkit-scrollbar-corner {
+            background: rgba(148, 148, 148, 0.99);
+        }
+    </style>
+    <link href="/ssh/webssh2.css" rel="stylesheet"/>
+    <link href="/ssh/favicon.ico" rel="icon"/>
+</head>
+<body>
+<div class="box">
+    <div id="header"></div>
+    <div class="terminal" id="terminal-container"></div>
+    <div id="bottomdiv">
+        <div class="dropup" id="menu">
+            <i class="fas fa-bars fa-fw"></i> Menu
+            <div class="dropup-content" id="dropupContent">
+                <a id="logBtn"><i class="fas fa-clipboard fa-fw"></i> Start Log</a>
+                <a id="downloadLogBtn"><i class="fas fa-download fa-fw"></i> Download Log</a>
+                <a id="credentialsBtn" style="display: none;"><i class="fas fa-key fa-fw"></i> Credentials</a>
+            </div>
+        </div>
+        <div id="footer"></div>
+        <div id="status"></div>
+        <div id="countdown"></div>
+    </div>
+</div>
+<script defer src="/ssh/webssh2.bundle.js"></script>
+</body>
+</html>

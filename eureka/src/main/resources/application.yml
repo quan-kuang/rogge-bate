@@ -1,0 +1,55 @@
+#server设置
+server:
+  #端口号
+  port: 9000
+  #设置服务地址
+  servlet:
+    context-path: /eureka
+#spring设置
+spring:
+  #环境设置
+  profiles:
+    active: dev
+  #服务名
+  application:
+    name: eureka
+  #身份认证
+  security:
+    user:
+      name: admin
+      password: loyer.
+#eureka设置
+eureka:
+  server:
+    #关闭注册中心自我保护模式，避免注册中心不移除失效的服务，默认为true
+    enable-self-preservation: false
+    #失效服务清理间隔，单位：毫秒
+    eviction-interval-timer-in-ms: 10000
+    #集群节点之间读取超时时间，单位：毫秒
+    peer-node-read-timeout-ms: 10000
+    #集群节点之间连接超时时间，单位：毫秒
+    peer-node-connect-timeout-ms: 1000
+    #服务状态的个更新时间间隔，单位：毫秒
+    peer-eureka-status-refresh-time-interval-ms: 0
+    #节点之间更新数据间隔时间，默认十分钟，单位：毫秒
+    peer-eureka-nodes-update-interval-ms: 100000
+  client:
+    #是否向注册中心注册服务
+    register-with-eureka: false
+    #是否向注册中心发现服务
+    fetch-registry: false
+    #注册中心地址，设置多服务器注册中心时需要将多个ip用‘,’分隔
+    service-url:
+      #服务器IP
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@${clientUrl}:9000/eureka/eureka/
+#logging日志
+logging:
+  level:
+    #忽略输出
+    com.netflix.eureka.registry: WARN
+    com.netflix.discovery.DiscoveryClient: WARN
+    com.netflix.discovery.provider.DiscoveryJerseyProvider: WARN
+    org.springframework.security.web.DefaultSecurityFilterChain: WARN
+    org.springframework.boot.actuate.endpoint.EndpointId: ERROR
+    org.springframework.cloud.security.oauth2.SpringCloudSecurityAutoConfiguration: ERROR
+    org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration: ERROR

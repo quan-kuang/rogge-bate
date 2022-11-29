@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.loyer.modules.system.mapper.postgresql.UtilMapper">
+
+    <!--查询数据库模式-->
+    <select id="selectSchemaName" resultType="java.lang.String">
+        SELECT DISTINCT schemaname FROM pg_tables
+    </select>
+
+    <!--查询表说明信息-->
+    <select id="selectTableExplain" parameterType="com.loyer.modules.system.entity.TableExplain" resultType="com.loyer.modules.system.entity.TableExplain">
+        WITH temp AS (
+        SELECT a.schemaname AS schema_name, b.oid, cast(obj_description(b.relfilenode, 'pg_class') AS VARCHAR) AS table_text, a.tablename AS table_name, a.tableowner AS table_owner, b.relkind AS table_type, b.relhaspkey AS is_has_pkey, a.hasindexes AS is_has_index, a.hastriggers AS is_has_trigger, b.relchecks AS has_checks, b.relnatts AS has_fields
+        FROM pg_tables a INNER JOIN pg_class b ON a.tablename = b.relname
+        ) SELECT * FROM temp
+        <where>
+            <if test="schemaName != null and schemaName != ''">AND schema_name = #{schemaName}</if>
+            <if test="tableName != null and tableName != ''">AND table_name like concat('%', #{tableName}, '%')</if>
+            <if test="params != null">
+                <if test="params.queryText != null and params.queryText != ''">AND (table_name ~ #{params.queryText} OR table_text ~ #{params.queryText})</if>
+                <if test="params.tableOids != null">AND oid IN
+                    <foreach collection="params.tableOids" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </if>
+            </if>
+        </where>
+        ORDER BY schema_name, table_name
+    </select>
+
+    <!--查询主键字段名（c/检查约束、f/外键约束、p/主键约束、u/唯一约束）-->
+    <select id="selectPrimaryKey" parameterType="int" resultType="java.lang.String">
+        SELECT b.attname AS "primarykey"
+        FROM pg_constraint a INNER JOIN pg_attribute b ON a.conrelid = b.attrelid AND a.conkey[1] = b.attnum INNER JOIN pg_type c ON b.atttypid = c.oid
+        WHERE a.conrelid = #{tableOid} AND a.contype = 'p'
+    </select>
+
+    <!--查询表字段信息-->
+    <select id="selectFieldExplain" parameterType="int" resultType="com.loyer.modules.system.entity.FieldExplain">
+        SELECT c.description AS field_text, a.attname AS field_name, concat_ws('', b.typname, SUBSTRING(format_type(a.atttypid, a.atttypmod) FROM '\(.*\)')) AS field_type, a.attnotnull AS is_not_null, a.atthasdef AS is_has_default, d.adsrc AS default_value
+        FROM pg_attribute a INNER JOIN pg_type b ON a.atttypid = b.oid LEFT JOIN pg_description c ON a.attrelid = c.objoid AND a.attnum = c.objsubid LEFT JOIN pg_attrdef d ON d.adrelid = #{tableOid} AND a.attnum = d.adnum
+        WHERE a.attrelid = #{tableOid} AND a.attnum &gt; 0
+        ORDER BY a.attnum
+    </select>
+</mapper>

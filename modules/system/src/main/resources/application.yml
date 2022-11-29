@@ -1,0 +1,275 @@
+#server设置
+server:
+  #端口号
+  port: 9030
+#spring设置
+spring:
+  #环境设置
+  profiles:
+    active: dev
+  #服务名称
+  application:
+    name: system
+  #servlet配置
+  servlet:
+    multipart:
+      #设置单个文件的大小
+      max-file-size: 20MB
+      #设置单次请求的文件的总大小
+      max-request-size: 100MB
+  #redis设置
+  redis:
+    host: ${databaseUrl}
+    port: 6379
+    password: 130304
+    timeout: 3000
+    database: 0
+  #spring-data设置
+  data:
+    redis:
+      #禁用redis仓库
+      repositories:
+        enabled: false
+  #datasource数据源设置
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      #初始连接数
+      initialSize: 5
+      #最小连接池数量
+      minIdle: 10
+      #最大连接池数量
+      maxActive: 20
+      #设置获取连接等待超时的时间，单位毫秒
+      maxWait: 30000
+      #检查空闲连接的频率，非正整数时表示不进行检查，单位毫秒
+      timeBetweenEvictionRunsMillis: 60000
+      #设置一个连接在池中最小生存的时间，单位毫秒
+      minEvictableIdleTimeMillis: 300000
+      #设置一个连接在池中最大生存的时间，单位毫秒
+      maxEvictableIdleTimeMillis: 600000
+      #设置数据源连接失败后是否跳出循环，默认false
+      breakAfterAcquireFailure: true
+      #设置数据源连接失败后的重试次数，默认1
+      connectionErrorRetryAttempts: 0
+      #设置连接失败后第二次重试的间隔时间，单位毫秒
+      timeBetweenConnectErrorMillis: 300000
+      #检查池中的连接是否仍可用的SQL语句
+      validationQuery: SELECT 1
+      #当程序请求连接池在分配连接时，是否先检查该连接是否有效
+      testWhileIdle: true
+      #取出是否检测
+      testOnBorrow: false
+      #归还是否检测
+      testOnReturn: false
+    list:
+      - name: postgresql
+        master: true
+        driverClassName: org.postgresql.Driver
+        url: jdbc:postgresql://${databaseUrl}:5432/example?charSet=utf-8
+        username: admin
+        password: admin
+      - name: mysql
+        master: false
+        driverClassName: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://${databaseUrl}:3306/example?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+        username: admin
+        password: admin
+      - name: oracle
+        master: false
+        driverClassName: oracle.jdbc.OracleDriver
+        url: jdbc:oracle:thin:@${oracleUrl}:1521:orcl
+        username: admin
+        password: admin
+  #spring-data-jpa设置
+  jpa:
+    enable: true
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://${databaseUrl}:5432/oceansoft?charSet=utf-8
+    username: admin
+    password: admin
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      pgsql-dialect: org.hibernate.dialect.PostgreSQL95Dialect
+    properties:
+      hibernate:
+        current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+        temp:
+          #处理启动报错org.postgresql.jdbc.PgConnection.createClob() 方法尚未被实作
+          use_jdbc_metadata_defaults: false
+  #freemarker模板引擎
+  freemarker:
+    template-loader-path: classpath:/templates/
+    cache: false
+    charset: UTF-8
+    content-type: text/html
+    suffix: .ftl
+    check-template-location: true
+    expose-request-attributes: true
+    expose-session-attributes: true
+    request-context-attribute: request
+  #thymeleaf模板引擎
+  thymeleaf:
+    prefix: classpath:/templates/
+    cache: false
+    encoding: UTF-8
+    suffix: .html
+    mode: HTML
+  #quartz配置
+  quartz:
+    #数据持久化方式
+    job-store-type: jdbc
+    #第一次启动时需要初始化，使用always，之后使用never（目前测试MYSQL数据库无效）
+    jdbc:
+      initialize-schema: never
+#eureka设置
+eureka:
+  client:
+    #是否向注册中心注册服务
+    register-with-eureka: true
+    #是否向注册中心发现服务
+    fetch-registry: true
+    service-url:
+      #注册中心地址，设置多服务器注册中心时需要将多个ip用‘,’分隔
+      defaultZone: ${eurekaUrl}
+  instance:
+    #将自己的IP注册到eureka
+    prefer-ip-address: true
+    #注册的ip地址，不指定的话会自己寻找
+    ip-address: ${clientUrl}
+    #客户端向服务端发送心跳的时间间隔，单位为秒，默认30
+    lease-renewal-interval-in-seconds: 10
+    #服务端在收到最后一次心跳之后等待的时间上限，单位为秒，超过则剔除，默认90
+    lease-expiration-duration-in-seconds: 30
+    #客户端安全认证
+    metadata-map:
+      user.name: admin
+      user.password: Loyer134.
+#feign设置
+feign:
+  #开启hystrix断路器
+  hystrix:
+    enabled: true
+  #客户端设置
+  client:
+    config:
+      default:
+        #建立连接超时时间
+        connectTimeout: 3000
+        #建立连接后读取资源超时时间
+        readTimeout: 10000
+#hystrix设置
+hystrix:
+  #熔断机制
+  command:
+    default:
+      execution:
+        timeout:
+          #如果enabled设置为false，则请求超时交给ribbon控制，为true，则超时作为熔断根据
+          enabled: true
+        isolation:
+          thread:
+            #超时时间（默认1000ms）在调用方设置，被该调用方的所有方法的超时时间都是该值，优先级低于下边的指定设置
+            timeoutInMilliseconds: 10000
+    circuitBreaker:
+      #当在设置时间窗口内达到此数量的失败后，进行短路。默认20个
+      requestVolumeThreshold: 20
+      #短路多久以后开始尝试是否恢复，默认5s
+      sleepWindowInMilliseconds: 5
+      #出错百分比阈值，当达到此阈值后，开始短路。默认50%
+      errorThresholdPercentage: 50%
+    fallback:
+      isolation:
+        semaphore:
+          #调用线程允许请求HystrixCommand.GetFallback()的最大数量，默认10。超出时将会有异常抛出，注意：该项设置对于THREAD隔离模式也起作用
+          maxConcurrentRequests: 10
+  #线程池设置
+  threadpool:
+    default:
+      #核心线程数，默认为10
+      coreSize: 10
+      #最大排队长度，默认-1 。如果要从-1换成其他值则需重启，即该值不能动态调整，若要动态调整，需要使用到下边这个设置
+      maxQueueSize: 10
+      #排队线程数量阈值，默认为5，达到时拒绝，如果设置了该选项，maxQueueSize失效，队列的大小已该值为准
+      queueSizeRejectionThreshold: 5
+#elasticsearch设置
+elasticsearch:
+  #启用
+  enable: true
+  #模式
+  scheme: http
+  #服务器地址，多个用半角逗号分割
+  servers: ${databaseUrl}:9200
+  #默认用户名
+  username: elastic
+  #密码
+  password: loyer.
+  #最大连接数
+  maxConnTotal: 100
+  #统一域名下的最大连接数
+  maxConnPerRoute: 100
+  #连接超时时长（单位毫秒）
+  connectTimeout: 3000
+  #数据读取超时时长（单位毫秒）
+  socketTimeout: 30000
+  #获取连接超时时长（单位毫秒）
+  connectionRequestTimeout: 500
+#vsFtpd文件服务器配置
+vs-ftpd:
+  url: ${vsFtpdUrl}
+  port: 21
+  username: admin
+  password: Loyer134.
+  timeout: 10000
+  unicode: UTF-8
+#fdfs文件服务器配置
+fdfs:
+  #连接超时时间
+  connect-timeout: 600
+  #读取超时时间
+  so-timeout: 1500
+  pool: #连接池
+    jmx-enabled: false
+    max-total: 100
+    max-total-per-key: 50
+    max-wait-millis: 5000
+  #缩略图的宽高
+  thumb-image:
+    width: 60
+    height: 60
+  #服务器地址，多个用半角逗号分割
+  tracker-list: ${serverUrl}:22122
+#微信公众号接口配置
+we-chat-config:
+  #测试公众号的appId
+  appId: wx7a9eb3c9029e9e51
+  #测试公众号的appSecret
+  appSecret: ee885ac3cf1e104f5c9fe2ea8ce888d5
+  #微信基础支持获取access_token
+  getTokenUrl: https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s
+  #获取微信接入JSSDK的权限验证参数
+  getTicketUrl: https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=%s
+  #微信媒体下载接口
+  getMediaUrl: https://file.api.weixin.qq.com/cgi-bin/media/get?access_token=%s&media_id=%s
+  #微信网页授权获取code
+  getAuthCodeUrl: https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&scope=%s&redirect_uri=%s&state=%s&response_type=code#wechat_redirect
+  #微信网页授权通过code换取access_token
+  getAccessTokenUrl: https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code
+  #微信网页授权拉取用户信息
+  getUserInfoUrl: https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN
+#健康检测
+management:
+  endpoints:
+    web:
+      exposure:
+        #通过HTTP公开所有的端点，默认是info,health
+        include: '*'
+  endpoint:
+    health:
+      #显示完整信息，默认是never
+      show-details: always
+  health:
+    #不检测数据库，oracle服务不存在会导致检测接口超时
+    db:
+      enabled: false

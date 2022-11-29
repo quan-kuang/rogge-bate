@@ -1,0 +1,99 @@
+#server设置
+server:
+  #端口号
+  port: 9050
+  #设置服务地址
+  servlet:
+    context-path: /visual
+#spring设置
+spring:
+  #环境设置
+  profiles:
+    active: dev
+  #服务名称
+  application:
+    name: monitor
+  #身份认证
+  security:
+    user:
+      name: admin
+      password: loyer.
+  #thymeleaf模板引擎
+  thymeleaf:
+    check-template: false
+    check-template-location: false
+  #关闭ribbon推荐
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+  #spring boot
+  boot:
+    admin:
+      ui:
+        public-url: ${publicUrl}
+#eureka设置
+eureka:
+  client:
+    #是否向注册中心注册服务
+    register-with-eureka: false
+    #是否向注册中心发现服务
+    fetch-registry: true
+    service-url:
+      #注册中心地址，设置多服务器注册中心时需要将多个ip用‘,’分隔
+      defaultZone: ${eurekaUrl}
+#feign设置
+feign:
+  #开启hystrix断路器
+  hystrix:
+    enabled: true
+  #客户端设置
+  client:
+    config:
+      default:
+        #建立连接超时时间
+        connectTimeout: 3000
+        #建立连接后读取资源超时时间
+        readTimeout: 10000
+#hystrix设置
+hystrix:
+  #熔断机制
+  command:
+    default:
+      execution:
+        timeout:
+          #如果enabled设置为false，则请求超时交给ribbon控制，为true，则超时作为熔断根据
+          enabled: true
+        isolation:
+          thread:
+            #超时时间（默认1000ms）在调用方设置，被该调用方的所有方法的超时时间都是该值，优先级低于下边的指定设置
+            timeoutInMilliseconds: 10000
+    circuitBreaker:
+      #当在设置时间窗口内达到此数量的失败后，进行短路。默认20个
+      requestVolumeThreshold: 20
+      #短路多久以后开始尝试是否恢复，默认5s
+      sleepWindowInMilliseconds: 5
+      #出错百分比阈值，当达到此阈值后，开始短路。默认50%
+      errorThresholdPercentage: 50%
+    fallback:
+      isolation:
+        semaphore:
+          #调用线程允许请求HystrixCommand.GetFallback()的最大数量，默认10。超出时将会有异常抛出，注意：该项设置对于THREAD隔离模式也起作用
+          maxConcurrentRequests: 10
+  #线程池设置
+  threadpool:
+    default:
+      #核心线程数，默认为10
+      coreSize: 10
+      #最大排队长度，默认-1 。如果要从-1换成其他值则需重启，即该值不能动态调整，若要动态调整，需要使用到下边这个设置
+      maxQueueSize: 10
+      #排队线程数量阈值，默认为5，达到时拒绝，如果设置了该选项，maxQueueSize失效，队列的大小已该值为准
+      queueSizeRejectionThreshold: 5
+#logging日志
+logging:
+  level:
+    #忽略输出
+    org.springframework.boot.actuate.endpoint.EndpointId: ERROR
+    org.springframework.cloud.security.oauth2.SpringCloudSecurityAutoConfiguration: ERROR
+    org.springframework.cloud.loadbalancer.config.LoadBalancerCacheAutoConfiguration: ERROR
+    com.netflix.discovery.shared.resolver.aws.ConfigClusterResolver: WARN

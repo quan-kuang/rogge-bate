@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="icon" th:href="@{/static/favicon/favicon.ico}" type="image/x-icon">
+    <script th:src="@{/static/js/jquery-3.4.1.min.js}"></script>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        img {
+            max-width: 300px;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+<h1 th:text="${apiResult.msg}"></h1>
+<div>
+    <img id="OcrFront"/>
+    <img id="OcrBack"/>
+    <img id="BestFrame">
+</div>
+<script th:inline="javascript">
+    if ([[${apiResult.flag}]]) {
+        const DetectInfo = JSON.parse([[${apiResult.data.DetectInfo}]]);
+        const Text = DetectInfo.Text; //文本信息
+        const IdCardData = DetectInfo.IdCardData; //身份证正反面
+        const BestFrame = DetectInfo.BestFrame; //最佳视频截图
+        const ocrFrontSrc = "data:image/png;base64," + IdCardData.OcrFront;
+        const ocrBackSrc = "data:image/png;base64," + IdCardData.OcrBack;
+        const bestFrameSrc = "data:image/png;base64," + BestFrame.BestFrame;
+        $("#OcrFront").attr('src', ocrFrontSrc);
+        $("#OcrBack").attr('src', ocrBackSrc);
+        $("#BestFrame").attr('src', bestFrameSrc);
+        console.log(Text)
+    }
+</script>
+</body>
+</html>
