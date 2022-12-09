@@ -36,3 +36,30 @@ export function setJedis(data) {
         data: data,
     });
 }
+
+/* 查询缓存列表*/
+export function selectCacheInfo(data) {
+    return request({
+        url: 'tools/cache/selectCacheInfo',
+        method: 'post',
+        data: data,
+    });
+}
+
+/* 查询缓存详情*/
+export function selectCacheInfoDetails(params) {
+    return request({
+        url: 'tools/cache/selectCacheInfoDetails',
+        method: 'get',
+        params: params,
+    });
+}
+
+/* 删除缓存信息*/
+export function deleteCacheInfo(data) {
+    return request({
+        url: 'tools/cache/deleteCacheInfo',
+        method: 'post',
+        data: data,
+    });
+}

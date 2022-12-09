@@ -111,4 +111,36 @@ public class DateUtil {
         long min = diff % nd % nh / nm;
         return day + "天" + hour + "小时" + min + "分钟";
     }
+
+    /**
+     * 时间换算
+     *
+     * @author kuangq
+     * @date 2022-12-01 18:08
+     */
+    public static String getStr(long diff) {
+        if (diff < 0) {
+            return "∞";
+        }
+        long nd = 60 * 60 * 24;
+        long nh = 60 * 60;
+        long nm = 60;
+        long day = diff / nd;
+        if (day > 0) {
+            return day + " day";
+        }
+        long hour = diff % nd / nh;
+        if (hour > 0) {
+            return hour + " hour";
+        }
+        long min = diff % nd % nh / nm;
+        if (min > 0) {
+            return min + " min";
+        }
+        long sec = diff % nd % nh % nm;
+        if (sec > 0) {
+            return min + " sec";
+        }
+        return "-";
+    }
 }

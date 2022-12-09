@@ -1,4 +1,4 @@
-package com.inherit;
+package com.loyer.modules.tools.inherit;
 
 import com.github.dockerjava.api.async.ResultCallbackTemplate;
 import com.github.dockerjava.api.model.Frame;

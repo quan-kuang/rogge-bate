@@ -8,6 +8,8 @@
 </template>
 
 <script>
+import {mapState} from 'vuex';
+
 export default {
     name: 'treeSelect',
     props: {
@@ -53,6 +55,12 @@ export default {
             },
         },
     },
+    computed: {
+        ...mapState({
+            tableMaxHeight: (state) => state.style.tableMaxHeight,
+            isShowPanelTitle: (state) => state.style.isShowPanelTitle,
+        }),
+    },
     methods: {
         // 设置某个节点的勾选状态
         setChecked(key, checked) {
@@ -77,6 +85,18 @@ export default {
         // 节点被点击时的回调
         nodeClick(node) {
             this.$emit('nodeClick', node);
+        },
+        /* 设置树的最大高度*/
+        setMaxHeight(value) {
+            if (!this.isShowPanelTitle) {
+                value -= 61;
+            }
+            this.$refs.treeSelect.$el.style.setProperty('max-height', `${value}px`);
+        },
+    },
+    watch: {
+        tableMaxHeight(value) {
+            this.setMaxHeight(value);
         },
     },
 };

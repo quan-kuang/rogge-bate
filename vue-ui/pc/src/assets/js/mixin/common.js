@@ -6,7 +6,7 @@ import {mapGetters, mapState} from 'vuex';
 import {panelTitle} from '@assets/js/common/components';
 import global from '@assets/js/util/global';
 
-const copy = {
+const common = {
     mixins: [popup],
     components: {
         panelTitle,
@@ -152,4 +152,4 @@ const copy = {
     },
 };
 
-export default copy;
+export default common;

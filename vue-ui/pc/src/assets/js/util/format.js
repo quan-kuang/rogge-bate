@@ -157,6 +157,7 @@ format.base64 = (base64) => {
     });
 };
 
+/* map排序*/
 format.sortObj = (data) => {
     // obj转map
     const map = new Map();
@@ -174,6 +175,11 @@ format.sortObj = (data) => {
         object[k] = v;
     }
     return object;
+};
+
+/* list排序*/
+format.sortList = (ary, key) => {
+    return ary.concat().sort((a, b) => a[key] > b[key] ? 1 : a[key] < b[key] ? -1 : 0);
 };
 
 export default format;

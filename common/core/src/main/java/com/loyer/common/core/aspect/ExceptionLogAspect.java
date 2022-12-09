@@ -51,6 +51,7 @@ public class ExceptionLogAspect {
             logger.error("【业务异常】{}：{}", operateLog.getTitle(), throwable.getMessage());
         } else {
             logger.error("【系统异常】{}：{}", operateLog.getTitle(), ExceptionUtil.getErrorMessage(throwable));
+            throwable.printStackTrace();
         }
     }
 }

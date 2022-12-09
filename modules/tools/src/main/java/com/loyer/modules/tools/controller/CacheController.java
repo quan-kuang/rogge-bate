@@ -2,7 +2,10 @@ package com.loyer.modules.tools.controller;
 
 import com.loyer.common.core.annotation.OperateLogAnnotation;
 import com.loyer.common.dedicine.entity.ApiResult;
+import com.loyer.modules.tools.entity.CacheInfo;
+import com.loyer.modules.tools.entity.CacheInfoDetails;
 import com.loyer.modules.tools.entity.JedisEntity;
+import com.loyer.modules.tools.service.CacheService;
 import com.loyer.modules.tools.utils.JedisUtil;
 import com.loyer.modules.tools.utils.RedisUtil;
 import io.swagger.annotations.Api;
@@ -11,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -23,6 +27,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("cache")
 public class CacheController {
+
+    @Resource
+    private CacheService cacheService;
 
     @OperateLogAnnotation
     @PreAuthorize("@pu.hasAllPermissions('redis:get')")
@@ -62,5 +69,29 @@ public class CacheController {
     @PostMapping("batchWriteData")
     public ApiResult batchWriteData(@Validated @RequestBody JedisEntity jedisEntity) {
         return JedisUtil.batchWriteData(jedisEntity);
+    }
+
+    @ApiOperation("查询缓存列表")
+    @PostMapping("selectCacheInfo")
+    public ApiResult selectCacheInfo(@RequestBody CacheInfo cacheInfo) {
+        return cacheService.selectCacheInfo(cacheInfo);
+    }
+
+    @ApiOperation("查询缓存详情")
+    @GetMapping("selectCacheInfoDetails")
+    public ApiResult selectCacheInfoDetails(@RequestParam String key) {
+        return cacheService.selectCacheInfoDetails(key);
+    }
+
+    @ApiOperation("删除缓存信息")
+    @PostMapping("deleteCacheInfo")
+    public ApiResult deleteCacheInfo(@RequestBody CacheInfoDetails cacheInfoDetails) {
+        return cacheService.deleteCacheInfo(cacheInfoDetails);
+    }
+
+    @ApiOperation("保存缓存信息")
+    @PostMapping("saveCacheInfo")
+    public ApiResult saveCacheInfo(@RequestBody CacheInfoDetails cacheInfoDetails) {
+        return cacheService.saveCacheInfo(cacheInfoDetails);
     }
 }

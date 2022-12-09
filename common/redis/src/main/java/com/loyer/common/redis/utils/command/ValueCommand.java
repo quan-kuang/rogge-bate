@@ -40,6 +40,10 @@ public class ValueCommand {
         return valueOperations.multiGet(keys);
     }
 
+    public long getExpire(String key) {
+        return valueOperations.getOperations().getExpire(key);
+    }
+
     public long incr(String key, long delta) {
         return valueOperations.increment(key, delta);
     }

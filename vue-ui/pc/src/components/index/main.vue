@@ -71,7 +71,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
     //高度撑满
     .el-container {
         height: 100%;

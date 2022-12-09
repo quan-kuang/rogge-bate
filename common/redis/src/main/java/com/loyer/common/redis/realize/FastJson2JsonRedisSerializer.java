@@ -36,6 +36,9 @@ public class FastJson2JsonRedisSerializer<T> implements RedisSerializer<T> {
         if (t == null) {
             return new byte[0];
         }
+        if (String.class.equals(t.getClass())) {
+            return t.toString().getBytes(StandardCharsets.UTF_8);
+        }
         return JSON.toJSONString(t, SerializerFeature.WriteClassName).getBytes(StandardCharsets.UTF_8);
     }
 
@@ -45,7 +48,11 @@ public class FastJson2JsonRedisSerializer<T> implements RedisSerializer<T> {
             return null;
         }
         String str = new String(bytes, StandardCharsets.UTF_8);
-        return JSON.parseObject(str, clazz);
+        try {
+            return JSON.parseObject(str, clazz);
+        } catch (Exception e) {
+            return (T) str;
+        }
     }
 
     public void setObjectMapper(ObjectMapper objectMapper) {
