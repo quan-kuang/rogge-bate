@@ -136,7 +136,7 @@ public class CodeCaptchaUtil {
     public ApiResult getCaptcha() {
         String nonceStr = GeneralUtil.getUuid();
         String value = nonceStr.substring(0, 4);
-        CacheUtil.VALUE.set(PrefixConst.CAPTCHA + nonceStr, value, 5 * 60L);
+        CacheUtil.STRING.set(PrefixConst.CAPTCHA + nonceStr, value, 300);
         BufferedImage bufferedImage = defaultKaptcha.createImage(value);
         String base64 = ImageUtil.toBase64(bufferedImage, "jpg", true);
         Captcha captcha = new Captcha();

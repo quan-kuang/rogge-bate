@@ -144,7 +144,7 @@ public class WeChatUtil {
         String key = PrefixConst.WE_CHAT_ACCESS_TOKEN + jsSdk.getAppId();
         //如果存在直接获取否则调接口获取
         if (CacheUtil.KEY.has(key)) {
-            return CacheUtil.VALUE.get(key).toString();
+            return CacheUtil.STRING.get(key).toString();
         }
         //接口地址从默认配置中获取
         String getTokenUrl = String.format(WE_CHAT_CONFIG.getGetTokenUrl(), jsSdk.getAppId(), jsSdk.getAppSecret());
@@ -157,7 +157,7 @@ public class WeChatUtil {
             throw new BusinessException(HintEnum.HINT_1012, accessToken);
         }
         //缓存accessToken过期时长设置与微信服务器一致默认7200s
-        CacheUtil.VALUE.set(key, accessToken.getAccess_token(), (long) accessToken.getExpires_in());
+        CacheUtil.STRING.set(key, accessToken.getAccess_token(), accessToken.getExpires_in());
         return accessToken.getAccess_token();
     }
 
@@ -172,7 +172,7 @@ public class WeChatUtil {
         String key = PrefixConst.WE_CHAT_API_TICKET + jsSdk.getAppId();
         //如果存在直接获取否则调接口获取
         if (CacheUtil.KEY.has(key)) {
-            return CacheUtil.VALUE.get(key).toString();
+            return CacheUtil.STRING.get(key).toString();
         }
         //接口地址从默认配置中获取
         String getTicketUrl = String.format(WE_CHAT_CONFIG.getGetTicketUrl(), getAccessToken(jsSdk));
@@ -184,7 +184,7 @@ public class WeChatUtil {
             throw new BusinessException(HintEnum.HINT_1013, apiTicket);
         }
         //缓存apiTicket过期时长设置与微信服务器一致默认7200s
-        CacheUtil.VALUE.set(key, apiTicket.getTicket(), (long) apiTicket.getExpires_in());
+        CacheUtil.STRING.set(key, apiTicket.getTicket(), apiTicket.getExpires_in());
         return apiTicket.getTicket();
     }
 
@@ -273,7 +273,7 @@ public class WeChatUtil {
         }
         //缓存微信授权用户信息
         String key = PrefixConst.WE_CHAT_AUTH_USER_INFO + authUserInfo.getOpenid();
-        CacheUtil.VALUE.set(key, authUserInfo, 3600 * 6L);
+        CacheUtil.STRING.set(key, authUserInfo, 3600 * 6);
         //加密用户昵称拼接到路由上
         return state + AesUtil.encrypt(authUserInfo.getNickname(), SystemConst.SECRET_KEY);
     }

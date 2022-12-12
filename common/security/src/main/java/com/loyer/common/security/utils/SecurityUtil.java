@@ -40,7 +40,7 @@ public class SecurityUtil {
         loginUser.setToken(token);
         //将用户信息加入缓存
         String key = PrefixConst.LOGIN_USER + token;
-        CacheUtil.VALUE.set(key, loginUser, SystemConst.USER_EXPIRE_TIME);
+        CacheUtil.STRING.set(key, loginUser, SystemConst.USER_EXPIRE_TIME);
         //返回前端的token进行加密
         Map<String, Object> claims = new HashMap<>(1);
         claims.put(PrefixConst.LOGIN_USER, token);
@@ -76,7 +76,7 @@ public class SecurityUtil {
         //解密token获取loginUserKey从缓存中获取用户信息
         String loginUserKey = PrefixConst.LOGIN_USER + getDecodeToken(token);
         if (CacheUtil.KEY.has((loginUserKey))) {
-            return CacheUtil.VALUE.get(loginUserKey);
+            return CacheUtil.STRING.get(loginUserKey);
         }
         throw new BusinessException(HintEnum.HINT_1099);
     }
@@ -102,7 +102,7 @@ public class SecurityUtil {
         LoginUser loginUser = getLoginUser();
         loginUser.setUser(user);
         String key = PrefixConst.LOGIN_USER + loginUser.getToken();
-        CacheUtil.VALUE.set(key, loginUser, SystemConst.USER_EXPIRE_TIME);
+        CacheUtil.STRING.set(key, loginUser, SystemConst.USER_EXPIRE_TIME);
     }
 
     /**

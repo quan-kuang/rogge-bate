@@ -84,7 +84,7 @@ public class NewsServiceImpl implements NewsService {
         ApiResult apiResult = MessageUtil.sendMessage(messageParams);
         //加入缓存
         if (apiResult.getFlag()) {
-            CacheUtil.VALUE.set(PrefixConst.CAPTCHA + phone, random, 3 * 60L);
+            CacheUtil.STRING.set(PrefixConst.CAPTCHA + phone, random, 180);
         }
         return apiResult;
     }
@@ -112,6 +112,6 @@ public class NewsServiceImpl implements NewsService {
         ConsoleLog consoleLog = JSON.parseObject(JSON.toJSONString(message), ConsoleLog.class);
         String key = String.format("%s%s", com.loyer.common.redis.constant.PrefixConst.CONSOLE_LOG, consoleLog.getSessionId());
         CacheUtil.LIST.rPush(key, consoleLog.getActive() ? consoleLog.getContent() : "finished");
-        CacheUtil.KEY.expire(key, 3600 * 24 * 3L);
+        CacheUtil.KEY.expire(key, 3600 * 24 * 3);
     }
 }

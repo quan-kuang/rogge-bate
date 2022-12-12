@@ -71,7 +71,7 @@ public class OnLineUserServiceImpl implements OnLineUserService {
         sendLoginInformMail(onLineUser);
         //加入缓存
         String key = PrefixConst.ONLINE_USER + token;
-        CacheUtil.VALUE.set(key, onLineUser, SystemConst.USER_EXPIRE_TIME);
+        CacheUtil.STRING.set(key, onLineUser, SystemConst.USER_EXPIRE_TIME);
     }
 
     /**
@@ -113,7 +113,7 @@ public class OnLineUserServiceImpl implements OnLineUserService {
     @Override
     public ApiResult selectOnLineUser(OnLineUser onLineUser) {
         Set<String> keys = CacheUtil.KEY.getKeys(PrefixConst.ONLINE_USER);
-        List<OnLineUser> onLineUserList = CacheUtil.VALUE.get(keys);
+        List<OnLineUser> onLineUserList = CacheUtil.STRING.get(keys);
         //校验结果集是否为空
         if (onLineUserList != null && !onLineUserList.isEmpty()) {
             //根据登录时间倒序排序

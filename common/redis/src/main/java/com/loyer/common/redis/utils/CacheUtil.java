@@ -19,21 +19,21 @@ public class CacheUtil {
 
     public static KeyCommand KEY;
 
-    public static ValueCommand VALUE;
+    public static SetCommand SET;
 
     public static ListCommand LIST;
 
-    public static SetCommand SET;
-
     public static HashCommand HASH;
+
+    public static StringCommand STRING;
 
     @Autowired
     public CacheUtil(RedisTemplate redisTemplate) {
         CLIENT = redisTemplate;
         KEY = new KeyCommand(redisTemplate);
-        VALUE = new ValueCommand(redisTemplate.opsForValue());
-        LIST = new ListCommand(redisTemplate.opsForList());
         SET = new SetCommand(redisTemplate.opsForSet());
+        LIST = new ListCommand(redisTemplate.opsForList());
         HASH = new HashCommand(redisTemplate.opsForHash());
+        STRING = new StringCommand(redisTemplate.opsForValue());
     }
 }

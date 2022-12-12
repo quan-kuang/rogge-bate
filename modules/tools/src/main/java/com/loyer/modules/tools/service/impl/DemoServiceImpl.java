@@ -27,7 +27,7 @@ public class DemoServiceImpl implements DemoService {
     public ApiResult getValue(String key) {
         Object result = null;
         if (CacheUtil.KEY.has(key)) {
-            result = CacheUtil.VALUE.get(key);
+            result = CacheUtil.STRING.get(key);
         }
         return ApiResult.success(result);
     }
@@ -42,19 +42,19 @@ public class DemoServiceImpl implements DemoService {
     public ApiResult setValue(Map<String, Object> params) {
         String[] strings = {"key", "value"};
         CheckParamsUtil.checkMap(params, strings);
-        long expireTime = -1;
+        int expireTime = -1;
         if (params.containsKey("expireTime")) {
             Object object = params.get("expireTime");
             if (object != null && Integer.class.getName().equals(object.getClass().getName())) {
-                expireTime = Long.parseLong(object.toString());
+                expireTime = Integer.parseInt(object.toString());
             }
         } else {
-            expireTime = 3600L;
+            expireTime = 3600;
         }
         if (expireTime == -1) {
-            CacheUtil.VALUE.set(params.get("key").toString(), params.get("value"));
+            CacheUtil.STRING.set(params.get("key").toString(), params.get("value"));
         } else {
-            CacheUtil.VALUE.set(params.get("key").toString(), params.get("value"), expireTime);
+            CacheUtil.STRING.set(params.get("key").toString(), params.get("value"), expireTime);
         }
         return ApiResult.success();
     }

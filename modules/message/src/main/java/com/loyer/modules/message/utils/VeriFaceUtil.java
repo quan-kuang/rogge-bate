@@ -53,7 +53,7 @@ public class VeriFaceUtil {
         String key = PrefixConst.BAIDU_AUTH_TOKEN + keyPair.getAppId();
         //校验缓存值是否存在
         if (CacheUtil.KEY.has(key)) {
-            return CacheUtil.VALUE.get(key);
+            return CacheUtil.STRING.get(key);
         }
         //组装入参
         BaiduEntity.OauthRequest oauthRequest = new BaiduEntity.OauthRequest();
@@ -64,7 +64,7 @@ public class VeriFaceUtil {
         BaiduEntity.OauthResponse oauthResponse = HttpUtil.doGet(GET_TOKEN_URL, oauthRequest, BaiduEntity.OauthResponse.class);
         String accessToken = oauthResponse.getAccess_token();
         //缓存access_token
-        CacheUtil.VALUE.set(key, accessToken, 3600 * 24 * 20L);
+        CacheUtil.STRING.set(key, accessToken, 3600 * 24 * 20);
         return accessToken;
     }
 

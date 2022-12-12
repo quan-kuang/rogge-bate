@@ -120,12 +120,12 @@ public class CacheServiceImpl implements CacheService {
         cacheInfoDetails.setKey(key);
         //noinspection ConstantConditions
         cacheInfoDetails.setType(dataType.name());
-        cacheInfoDetails.setExpire(CacheUtil.VALUE.getExpire(key));
+        cacheInfoDetails.setExpire(CacheUtil.STRING.getExpire(key));
         cacheInfoDetails.setExpireHum(DateUtil.getStr(cacheInfoDetails.getExpire()));
         if (dataType == DataType.STRING) {
-            cacheInfoDetails.setValue(CacheUtil.VALUE.get(key));
+            cacheInfoDetails.setValue(CacheUtil.STRING.get(key));
         } else if (dataType == DataType.SET) {
-            cacheInfoDetails.setValue(CacheUtil.SET.get(key));
+            cacheInfoDetails.setValue(CacheUtil.SET.members(key));
         } else if (dataType == DataType.LIST) {
             cacheInfoDetails.setValue(CacheUtil.LIST.range(key));
         } else if (dataType == DataType.HASH) {

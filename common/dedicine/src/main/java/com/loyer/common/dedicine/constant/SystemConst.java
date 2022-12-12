@@ -53,7 +53,7 @@ public interface SystemConst {
     String VUE_PROJECT_PATH = "/home/admin/project/vue/";
 
     //用户信息缓存时长
-    Long USER_EXPIRE_TIME = 3600L;
+    Integer USER_EXPIRE_TIME = 3600;
 
     //拼图验证码允许偏差
     Integer ALLOW_DEVIATION = 3;

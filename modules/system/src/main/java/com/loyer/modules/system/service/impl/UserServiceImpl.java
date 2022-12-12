@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(HintEnum.HINT_1086);
         }
         //校验短信验证码
-        if (!CacheUtil.VALUE.get(key).equals(user.getPassword())) {
+        if (!CacheUtil.STRING.get(key).equals(user.getPassword())) {
             throw new BusinessException(HintEnum.HINT_1087);
         }
         //删除缓存
@@ -175,7 +175,7 @@ public class UserServiceImpl implements UserService {
         //文字验证
         if (CaptchaType.CODE.value().equals(captcha.getType())) {
             //获取缓存验证码
-            String value = CacheUtil.VALUE.get(key);
+            String value = CacheUtil.STRING.get(key);
             //比对输入验证码是否一致（不区分大小写）
             if (!value.equalsIgnoreCase(captcha.getValue())) {
                 throw new BusinessException(HintEnum.HINT_1087);
@@ -184,7 +184,7 @@ public class UserServiceImpl implements UserService {
         //拼图验证
         else if (CaptchaType.PUZZLE.value().equals(captcha.getType())) {
             //获取缓存验证码
-            Integer value = CacheUtil.VALUE.get(key);
+            Integer value = CacheUtil.STRING.get(key);
             //根据移动距离判断验证是否成功
             if (Math.abs(value - Integer.parseInt(captcha.getValue())) > SystemConst.ALLOW_DEVIATION) {
                 throw new BusinessException(HintEnum.HINT_1087);

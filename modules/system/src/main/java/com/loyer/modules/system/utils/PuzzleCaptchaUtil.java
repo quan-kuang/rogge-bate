@@ -60,7 +60,7 @@ public class PuzzleCaptchaUtil {
         cutByTemplate(canvasImage, blockImage, blockWidth, blockHeight, blockRadius, blockX, blockY);
         //缓存移动横坐标
         String nonceStr = GeneralUtil.getUuid();
-        CacheUtil.VALUE.set(PrefixConst.CAPTCHA + nonceStr, blockX, 3 * 60L);
+        CacheUtil.STRING.set(PrefixConst.CAPTCHA + nonceStr, blockX, 180);
         //设置返回参数
         Captcha result = new Captcha();
         result.setNonceStr(nonceStr);

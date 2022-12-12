@@ -97,7 +97,7 @@ public class DemoController {
             apiResult.setData(response.getUrl());
             //缓存BizToken
             String key = PrefixConst.TENCENT_BIZ_TOKEN + requestId;
-            CacheUtil.VALUE.set(key, response.getBizToken(), SystemConst.USER_EXPIRE_TIME);
+            CacheUtil.STRING.set(key, response.getBizToken(), SystemConst.USER_EXPIRE_TIME);
         }
         model.addAttribute("apiResult", apiResult);
         return new ModelAndView("ftl/confirm");
@@ -114,7 +114,7 @@ public class DemoController {
             apiResult = ApiResult.hintEnum(HintEnum.HINT_1024);
         } else {
             //获取bizToken
-            String bizToken = CacheUtil.VALUE.get(key);
+            String bizToken = CacheUtil.STRING.get(key);
             CacheUtil.KEY.delete(key);
             //请求获取认证结果
             apiResult = AuthFaceUtil.getDetectInfo(ruleId, infoType, bizToken);
