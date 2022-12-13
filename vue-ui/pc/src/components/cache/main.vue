@@ -114,7 +114,7 @@
                             <el-input ref="textarea" type="textarea" autosize v-model="details.content"/>
                         </el-row>
                         <div style="position: absolute;right: 30px;bottom: 30px;">
-                            <el-button type="success" icon="el-icon-check" @click="foldAll">保存</el-button>
+                            <el-button type="success" icon="el-icon-check" @click="saveCacheInfo">保存</el-button>
                         </div>
                     </div>
                 </el-card>
@@ -124,10 +124,11 @@
 </template>
 
 <script>
+import global from '@assets/js/util/global';
 import format from '@assets/js/util/format';
 import copy from '@assets/js/mixin/copy';
 import common from '@assets/js/mixin/common';
-import {deleteCacheInfo, selectCacheInfo, selectCacheInfoDetails} from '@assets/js/api/cache';
+import {deleteCacheInfo, saveCacheInfo, selectCacheInfo, selectCacheInfoDetails} from '@assets/js/api/cache';
 
 export default {
     name: 'cache',
@@ -268,8 +269,11 @@ export default {
                 this.details.field = row.value;
                 this.details.content = this.details.value[row.value];
             } else {
+                this.details.field = row.key - 1;
                 this.details.content = this.details.value[row.key - 1];
             }
+            this.details.index = row.key - 1;
+            this.details.oldValue = global.deepClone(this.details.content);
             this.details = Object.assign({}, this.details);
         },
         /* 设置序号*/
@@ -353,6 +357,37 @@ export default {
                     } else {
                         self.selectCacheInfo();
                         self.details = {};
+                    }
+                } else {
+                    self.messageError(response.msg);
+                }
+            }).finally(() => {
+                loading && loading.close();
+            });
+        },
+        /* 保存缓存信息*/
+        saveCacheInfo() {
+            let self = this;
+            if (this.details.content === this.details.oldValue) {
+                self.messageError('内容无变更');
+                return;
+            }
+            const data = {
+                key: self.details.key,
+                type: self.details.type,
+                field: self.details.field,
+                value: self.details.oldValue,
+                newValue: self.details.content,
+                expire: self.details.expire,
+            };
+            const loading = self.loadingOpen('.cache');
+            saveCacheInfo(data).then((response) => {
+                if (response.flag) {
+                    if (self.details.type === 'HASH') {
+                        self.details.value[self.details.field] = self.details.content;
+                    } else {
+                        self.detailsList[self.details.index] = {key: self.details.index + 1, value: self.details.content};
+                        self.filterCacheInfoDetails();
                     }
                 } else {
                     self.messageError(response.msg);

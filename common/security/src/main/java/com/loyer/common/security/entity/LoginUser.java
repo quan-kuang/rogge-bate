@@ -21,7 +21,7 @@ import java.util.Collection;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@JsonInclude(value = JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginUser implements UserDetails {
 
     //认证凭据

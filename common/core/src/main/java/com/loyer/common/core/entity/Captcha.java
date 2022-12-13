@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
  * @author kuangq
  * @date 2020-11-13 10:36
  */
-@JsonInclude(value = JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @NoArgsConstructor
 @ApiModel("实体类基类")

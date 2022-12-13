@@ -191,8 +191,37 @@ public class CacheServiceImpl implements CacheService {
         return ApiResult.hintEnum(HintEnum.HINT_1080);
     }
 
+    /**
+     * 保存缓存信息
+     *
+     * @author kuangq
+     * @date 2022-12-13 15:02
+     */
     @Override
     public ApiResult saveCacheInfo(CacheInfoDetails cacheInfoDetails) {
-        return null;
+        String key = cacheInfoDetails.getKey();
+        Object newValue = cacheInfoDetails.getNewValue();
+        DataType dataType = DataType.valueOf(cacheInfoDetails.getType());
+        if (dataType == DataType.STRING) {
+            CacheUtil.STRING.set(key, newValue);
+            return ApiResult.success();
+        }
+        if (dataType == DataType.HASH) {
+            String field = cacheInfoDetails.getField();
+            CacheUtil.HASH.put(key, field, newValue);
+            return ApiResult.success();
+        }
+        Object oldValue = cacheInfoDetails.getValue();
+        if (dataType == DataType.SET) {
+            CacheUtil.SET.delete(key, oldValue);
+            CacheUtil.SET.add(key, newValue);
+            return ApiResult.success();
+        }
+        if (dataType == DataType.LIST) {
+            CacheUtil.LIST.rPush(key, oldValue, newValue);
+            CacheUtil.LIST.delete(key, oldValue);
+            return ApiResult.success();
+        }
+        return ApiResult.hintEnum(HintEnum.HINT_1080);
     }
 }

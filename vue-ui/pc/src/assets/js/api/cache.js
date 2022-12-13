@@ -63,3 +63,12 @@ export function deleteCacheInfo(data) {
         data: data,
     });
 }
+
+/* 保存缓存信息*/
+export function saveCacheInfo(data) {
+    return request({
+        url: 'tools/cache/saveCacheInfo',
+        method: 'post',
+        data: data,
+    });
+}

@@ -159,7 +159,7 @@ public class TencentEntity {
 
         @Data
         @NoArgsConstructor
-        @JsonInclude(value = JsonInclude.Include.NON_NULL)
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         public static class Response {
             //一次核身流程的标识，有效时间为7,200秒，完成核身后，可用该标识获取验证结果信息
             private String BizToken;

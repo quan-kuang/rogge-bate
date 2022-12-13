@@ -118,7 +118,7 @@ public class RedisClientConfig {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(stringRedisSerializer);
         redisTemplate.setValueSerializer(fastJson2JsonRedisSerializer);
-        redisTemplate.setHashKeySerializer(fastJson2JsonRedisSerializer);
+        redisTemplate.setHashKeySerializer(stringRedisSerializer);
         redisTemplate.setHashValueSerializer(fastJson2JsonRedisSerializer);
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
