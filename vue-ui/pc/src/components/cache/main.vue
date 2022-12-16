@@ -94,12 +94,20 @@
                                 <span>{{ details.key || '&emsp;' }}</span>
                             </el-col>
                         </el-row>
-                        <el-row class="group-item underline">
+                        <el-row class="group-item underline" v-show="details.type==='HASH'">
                             <el-col :span="3">
                                 <span>FIELD</span>
                             </el-col>
                             <el-col :span="21">
                                 <span>{{ details.field || '&emsp;' }}</span>
+                            </el-col>
+                        </el-row>
+                        <el-row class="group-item underline">
+                            <el-col :span="3">
+                                <span>EXPIRE</span>
+                            </el-col>
+                            <el-col :span="21">
+                                <span>{{ details.expireHum || '&emsp;' }}</span>
                             </el-col>
                         </el-row>
                         <el-row class="group-item underline">
@@ -114,7 +122,7 @@
                             <el-input ref="textarea" type="textarea" autosize v-model="details.content"/>
                         </el-row>
                         <div style="position: absolute;right: 30px;bottom: 30px;">
-                            <el-button type="success" icon="el-icon-check" @click="saveCacheInfo">保存</el-button>
+                            <el-button type="success" icon="el-icon-edit" @click="saveCacheInfo" :disabled="!details.type">保存</el-button>
                         </div>
                     </div>
                 </el-card>
@@ -189,6 +197,12 @@ export default {
                     const table = [];
                     const detailsList = [];
                     const details = response.data;
+                    if (!details) {
+                        self.details = {};
+                        self.detailsList = [];
+                        self.messageWaning('该key已被删除');
+                        return;
+                    }
                     if (details.type === 'STRING') {
                         detailsList.push({key: 1, value: details.value});
                         table.push({key: 1, value: self.disposeBigValue(details.value)});
@@ -368,10 +382,6 @@ export default {
         /* 保存缓存信息*/
         saveCacheInfo() {
             let self = this;
-            if (this.details.content === this.details.oldValue) {
-                self.messageError('内容无变更');
-                return;
-            }
             const data = {
                 key: self.details.key,
                 type: self.details.type,
@@ -379,6 +389,7 @@ export default {
                 value: self.details.oldValue,
                 newValue: self.details.content,
                 expire: self.details.expire,
+                expireHum: self.details.expireHum,
             };
             const loading = self.loadingOpen('.cache');
             saveCacheInfo(data).then((response) => {
@@ -389,6 +400,7 @@ export default {
                         self.detailsList[self.details.index] = {key: self.details.index + 1, value: self.details.content};
                         self.filterCacheInfoDetails();
                     }
+                    self.messageSuccess(response.msg);
                 } else {
                     self.messageError(response.msg);
                 }
@@ -400,9 +412,10 @@ export default {
         copy(row, column, event) {
             event.preventDefault();
             event.stopPropagation();
-            if (['键名', 'KEY', 'FIELD', 'VALUE'].includes(column.label)) {
-                const msg = row[column.property];
-                this.hbdtwx(event, msg, column.label);
+            const label = column.label;
+            if (['键名', 'FIELD'].includes(label)) {
+                const msg = row[label === '键名' ? 'key' : 'value'];
+                this.hbdtwx(event, msg, label);
             }
         },
         /* 获取数据类型样式*/

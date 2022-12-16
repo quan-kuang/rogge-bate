@@ -137,9 +137,9 @@ public class DateUtil {
         if (min > 0) {
             return min + " min";
         }
-        long sec = diff % nd % nh % nm;
+        long sec = diff % nd % nh;
         if (sec > 0) {
-            return min + " sec";
+            return sec + " sec";
         }
         return "-";
     }

@@ -199,29 +199,30 @@ public class CacheServiceImpl implements CacheService {
      */
     @Override
     public ApiResult saveCacheInfo(CacheInfoDetails cacheInfoDetails) {
-        String key = cacheInfoDetails.getKey();
-        Object newValue = cacheInfoDetails.getNewValue();
         DataType dataType = DataType.valueOf(cacheInfoDetails.getType());
-        if (dataType == DataType.STRING) {
-            CacheUtil.STRING.set(key, newValue);
-            return ApiResult.success();
-        }
-        if (dataType == DataType.HASH) {
-            String field = cacheInfoDetails.getField();
-            CacheUtil.HASH.put(key, field, newValue);
-            return ApiResult.success();
-        }
+        String key = cacheInfoDetails.getKey();
         Object oldValue = cacheInfoDetails.getValue();
-        if (dataType == DataType.SET) {
-            CacheUtil.SET.delete(key, oldValue);
-            CacheUtil.SET.add(key, newValue);
-            return ApiResult.success();
+        Object newValue = cacheInfoDetails.getNewValue();
+        if (newValue != null) {
+            if (dataType == DataType.STRING) {
+                CacheUtil.STRING.set(key, newValue);
+            } else if (dataType == DataType.HASH) {
+                String field = cacheInfoDetails.getField();
+                CacheUtil.HASH.put(key, field, newValue);
+            } else if (dataType == DataType.SET) {
+                CacheUtil.SET.delete(key, oldValue);
+                CacheUtil.SET.add(key, newValue);
+            } else if (dataType == DataType.LIST) {
+                CacheUtil.LIST.rPush(key, oldValue, newValue);
+                CacheUtil.LIST.delete(key, oldValue);
+            } else {
+                return ApiResult.hintEnum(HintEnum.HINT_1080);
+            }
         }
-        if (dataType == DataType.LIST) {
-            CacheUtil.LIST.rPush(key, oldValue, newValue);
-            CacheUtil.LIST.delete(key, oldValue);
-            return ApiResult.success();
+        Long expire = cacheInfoDetails.getExpire();
+        if (!DateUtil.getStr(cacheInfoDetails.getExpire()).equals(cacheInfoDetails.getExpireHum())) {
+            CacheUtil.KEY.expire(key, expire.intValue());
         }
-        return ApiResult.hintEnum(HintEnum.HINT_1080);
+        return ApiResult.success();
     }
 }
