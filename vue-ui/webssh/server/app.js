@@ -1,29 +1,29 @@
 const config = require('./config');
-const path = require('path');
-
-const nodeRoot = path.dirname(require.main.filename);
-const publicPath = path.join(nodeRoot, 'client', 'public');
 const express = require('express');
 const logger = require('morgan');
+const favicon = require('serve-favicon');
+
+const path = require('path');
+const nodeRoot = path.dirname(require.main.filename);
+const publicPath = path.join(nodeRoot, 'client', 'public');
 
 const app = express();
 const server = require('http').Server(app);
-const favicon = require('serve-favicon');
 const io = require('socket.io')(server, config.socketio);
 const session = require('express-session')(config.express);
 
 const appSocket = require('./socket');
+const {logDebug} = require('./logging');
 const {setDefaultCredentials, basicAuth} = require('./util');
-const {webssh2debug} = require('./logging');
 const {reauth, connect, notfound, handleErrors} = require('./routes');
 
 setDefaultCredentials(config.user);
 
 // safe shutdown
 let remainingSeconds = config.safeShutdownDuration;
-let shutdownMode = false;
 let shutdownInterval;
 let connectionCount = 0;
+let shutdownMode = false;
 
 // eslint-disable-next-line consistent-return
 function safeShutdownGuard(req, res, next) {
@@ -37,7 +37,7 @@ app.use(safeShutdownGuard);
 app.use(session);
 app.disable('x-powered-by');
 app.use(favicon(path.join(publicPath, 'favicon.ico')));
-// app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({extended: true}));
 app.use('/ssh', express.static(publicPath, config.express.ssh));
 app.use(basicAuth);
 app.get('/ssh/host/:host?', connect);
@@ -94,7 +94,7 @@ const onConnection = (socket) => {
     socket.on('geometry', (cols, rows) => {
         // TODO need to rework how we pass settings to ssh2, this is less than ideal
         socket.request.session.ssh.terminfo = {cols, rows};
-        webssh2debug(socket, `SOCKET GEOMETRY: termCols = ${cols}, termRows = ${rows}`);
+        logDebug(socket, `SOCKET GEOMETRY: termCols = ${cols}, termRows = ${rows}`);
     });
 };
 

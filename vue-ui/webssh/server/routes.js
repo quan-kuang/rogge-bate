@@ -1,13 +1,10 @@
 // ssh.js
-const request = require('request-promise')
-const validator = require('validator');
 const path = require('path');
-
+const config = require('./config');
+const validator = require('validator');
 const nodeRoot = path.dirname(require.main.filename);
-
 const publicPath = path.join(nodeRoot, 'client', 'public');
 const {parseBool} = require('./util');
-const config = require('./config');
 
 exports.connect = async function connect(req, res) {
     res.sendFile(path.join(path.join(publicPath, 'client.htm')));
@@ -35,6 +32,12 @@ exports.connect = async function connect(req, res) {
     const redisHost = req.params.host
     if (!redisHost) {
         res.status(403).send("redis host can not be blank");
+        return
+    }
+
+    const regExp = /^((([1-9]?\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}([1-9]?\d|1\d{2}|2[0-4]\d|25[0-5])):([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
+    if (!regExp.test(redisHost)) {
+        res.status(403).send("this is an invalid redis host");
         return
     }
 
@@ -126,7 +129,11 @@ exports.connect = async function connect(req, res) {
     req.session.ssh = {
         host,
         port,
-        redis: {host: redisHost},
+        redis: {
+            token: token,
+            host: redisHost,
+            getRedisUrl: config['getRedisUrl'],
+        },
         localAddress: config.ssh.localAddress,
         localPort: config.ssh.localPort,
         header: {

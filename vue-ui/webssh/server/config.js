@@ -1,10 +1,10 @@
 const fs = require('fs');
-const path = require('path');
-const merger = require('json-merger');
-const debugWebSSH2 = require('debug')('WebSSH2');
-const crypto = require('crypto');
 const util = require('util');
-const readconfig = require('read-config-ng');
+const path = require('path');
+const crypto = require('crypto');
+const merger = require('json-merger');
+const readConfig = require('read-config-ng');
+const debugWebSSH2 = require('debug')('WebSSH2');
 
 const nodeRoot = path.dirname(require.main.filename);
 const configPath = path.join(nodeRoot, 'config.json');
@@ -104,7 +104,7 @@ try {
         console.error(`ERROR: Missing config.json for WebSSH2. Current config: ${util.inspect(myConfig)}`);
     }
     console.info(`WebSSH2 service reading config from: ${configPath}`);
-    const configFile = readconfig(configPath, {override: true});
+    const configFile = readConfig(configPath, {override: true});
     myConfig = merger.mergeObjects([configDefault, configFile]);
     debugWebSSH2(`Current config: ${util.inspect(myConfig)}`);
 } catch (err) {

@@ -176,6 +176,7 @@ public class UserServiceImpl implements UserService {
         if (CaptchaType.CODE.value().equals(captcha.getType())) {
             //获取缓存验证码
             String value = CacheUtil.STRING.get(key);
+            CacheUtil.KEY.delete(key);
             //比对输入验证码是否一致（不区分大小写）
             if (!value.equalsIgnoreCase(captcha.getValue())) {
                 throw new BusinessException(HintEnum.HINT_1087);
@@ -185,13 +186,12 @@ public class UserServiceImpl implements UserService {
         else if (CaptchaType.PUZZLE.value().equals(captcha.getType())) {
             //获取缓存验证码
             Integer value = CacheUtil.STRING.get(key);
+            CacheUtil.KEY.delete(key);
             //根据移动距离判断验证是否成功
             if (Math.abs(value - Integer.parseInt(captcha.getValue())) > SystemConst.ALLOW_DEVIATION) {
                 throw new BusinessException(HintEnum.HINT_1087);
             }
         }
-        //删除缓存
-        CacheUtil.KEY.delete(key);
     }
 
     /**

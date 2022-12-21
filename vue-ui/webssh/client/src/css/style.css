@@ -55,6 +55,7 @@ body, html {
     border-width: 1px;
     z-index: 99;
     height: 19px;
+    line-height: 19px;
 }
 
 #footer {

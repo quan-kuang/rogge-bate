@@ -12,8 +12,8 @@ function prefix(socket) {
 }
 
 // public
-function webssh2debug(socket, msg) {
-    debug('WebSSH2')(`${prefix(socket)} ${msg}`);
+function logDebug(socket, msg) {
+    debug('DEBUG')(`${msg}`);
 }
 
 /**
@@ -21,8 +21,8 @@ function webssh2debug(socket, msg) {
  * @param {object} socket Socket information
  * @param {object} msg    log message
  */
-function auditLog(socket, msg) {
-    console.info(`WebSSH2 ${prefix(socket)} AUDIT: ${msg}`);
+function logInfo(socket, msg) {
+    console.info(`INFO: ${msg}`);
 }
 
 /**
@@ -33,10 +33,10 @@ function auditLog(socket, msg) {
  * @param {object} err    error object or error message
  */
 function logError(socket, myFunc, err) {
-    console.error(`WebSSH2 ${prefix(socket)} ERROR: ${myFunc}: ${err}`);
-    webssh2debug(socket, `logError: ${myFunc}: ${util.inspect(err)}`);
+    console.error(`ERROR: ${myFunc}: ${err}`);
+    logDebug(socket, `logError: ${myFunc}: ${util.inspect(err)}`);
     if (!socket.request.session) return;
-    socket.emit('ssherror', `SSH ${myFunc}: ${err}`);
+    socket.emit('ssherror', `${myFunc}: ${err}`);
 }
 
-module.exports = {logError, auditLog, webssh2debug};
+module.exports = {logError, logInfo, logDebug};

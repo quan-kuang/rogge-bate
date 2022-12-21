@@ -11,14 +11,14 @@
         ]
     },
     "user": {
-        "name": "root",
-        "password": "red0s@ly.c0m",
+        "name": "admin",
+        "password": "Loyer134.",
         "privatekey": null,
         "overridebasic": false
     },
     "ssh": {
-        "host": "10.177.41.87",
-        "port": 12222,
+        "host": "129.211.123.68",
+        "port": 22,
         "localAddress": null,
         "localPort": null,
         "term": "xterm-color",
@@ -31,8 +31,7 @@
         "cursorBlink": true,
         "scrollback": 10000,
         "tabStopWidth": 8,
-        "bellStyle": "sound",
-        "fontSize": 14
+        "bellStyle": "sound"
     },
     "header": {
         "text": null,
@@ -44,7 +43,7 @@
     },
     "options": {
         "challengeButton": true,
-        "allowreauth": false
+        "allowreauth": true
     },
     "algorithms": {
         "kex": [
@@ -81,5 +80,6 @@
     },
     "accesslog": false,
     "verify": false,
-    "safeShutdownDuration": 300
+    "safeShutdownDuration": 300,
+    "getRedisUrl": "http://loyer.com:9010/tools/cache/getRedis/config?param=requirepass"
 }
