@@ -40,8 +40,8 @@ const configDefault = {
         },
     },
     user: {
-        name: "admin",
-        password: "Loyer134.",
+        name: "redis",
+        password: "redis",
         privatekey: null,
         overridebasic: false,
     },

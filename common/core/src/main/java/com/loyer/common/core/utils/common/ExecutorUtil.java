@@ -22,13 +22,13 @@ public class ExecutorUtil {
         //核心线程数
         int corePoolSize = Runtime.getRuntime().availableProcessors();
         //最大线程数
-        int maximumPoolSize = 2 * corePoolSize + 1;
+        int maximumPoolSize = 3 * corePoolSize + 1;
         //空闲等待时间
         long keepAliveTime = 3L;
         //等待时间单位
         TimeUnit timeUnit = TimeUnit.SECONDS;
         //等待队列
-        BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>(100);
+        BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>(1000);
         //线程工厂
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
         //拒绝策略

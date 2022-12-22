@@ -1,6 +1,8 @@
 package com.loyer.modules.message.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -48,14 +50,9 @@ public class EastMoney {
         private Integer lt;
         private Integer full;
         private Long svr;
-        private Data data;
+        private EastMoney.Response.Data data;
 
-        public Data getData() {
-            return data;
-        }
-
-        @Getter
-        @Setter
+        @lombok.Data
         @NoArgsConstructor
         @AllArgsConstructor
         public static class Data {
