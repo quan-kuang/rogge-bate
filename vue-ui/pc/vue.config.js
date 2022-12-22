@@ -102,6 +102,14 @@ module.exports = {
                     '^/springboot-admin': 'visual',
                 },
             },
+            '/ssh': {
+                /* 设置服务器调用的接口域名和端口号*/
+                target: 'http://loyer.com:2222',
+                /* 允许跨域*/
+                changOrigin: true,
+                /* 是否验证SSL*/
+                secure: false,
+            },
             '/view': {
                 /* 设置服务器调用的接口域名和端口号*/
                 target: 'https://loyer.wang',

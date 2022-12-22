@@ -1,12 +1,14 @@
 package com.loyer.modules.tools.utils;
 
 import com.loyer.common.core.constant.SpecialCharsConst;
+import com.loyer.common.core.utils.reflect.ContextUtil;
 import com.loyer.common.dedicine.entity.ApiResult;
 import com.loyer.common.dedicine.enums.HintEnum;
 import com.loyer.common.redis.utils.CacheUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.types.RedisClientInfo;
 
@@ -25,6 +27,8 @@ public class RedisUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisUtil.class);
 
+    private static final Environment ENVIRONMENT = ContextUtil.getBean(Environment.class);
+
     private static RedisConnection getConnection() {
         return CacheUtil.CLIENT.getRequiredConnectionFactory().getConnection();
     }
@@ -37,6 +41,8 @@ public class RedisUtil {
      */
     public static ApiResult getRedis(String type, String param) {
         switch (type) {
+            case "host":
+                return ApiResult.success(String.format("%s:%s", ENVIRONMENT.getProperty("spring.redis.host"), ENVIRONMENT.getProperty("spring.redis.port")));
             case "info":
                 return ApiResult.success(getInfo(param));
             case "config":

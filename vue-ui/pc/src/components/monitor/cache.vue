@@ -1,7 +1,9 @@
 <template>
     <div class="cache">
-        <!--面板标签-->
-        <panel-title/>
+        <!-- 面板标签-->
+        <panel-title>
+            <el-button type="info" icon="el-icon-s-platform" @click="openWebssh" v-has-all-permissions="['cache:webssh']">控制台</el-button>
+        </panel-title>
         <!--主界面-->
         <el-row>
             <!--缓存列表-->
@@ -12,7 +14,7 @@
                         <el-col :span="12" class="pr-10">
                             <el-input v-model="key" placeholder="请输入key*" clearable prefix-icon="el-icon-search" @keyup.enter.native="selectCacheInfo"/>
                         </el-col>
-                        <el-button type="primary" icon="el-icon-search" @click="selectCacheInfo" @contextmenu.prevent.native="setFormatTree">查询</el-button>
+                        <el-button type="primary" icon="el-icon-search" @click="selectCacheInfo" @contextmenu.prevent.native="setFormatTree" v-has-all-permissions="['cache:select']">查询</el-button>
                         <el-button type="info" icon="el-icon-sort" @click="foldAll" v-show="formatTree">折叠</el-button>
                     </el-row>
                     <!--列表结构-->
@@ -32,7 +34,7 @@
                                 <span>{{ scope.row.key }}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="操作" width="80">
+                        <el-table-column label="操作" width="80" v-if="isHasAllPermissions(['cache:delete'])">
                             <template slot-scope="scope">
                                 <el-button size="mini" type="text" @click="deleteKey(scope.row,$event)">删除</el-button>
                             </template>
@@ -43,7 +45,7 @@
                               @row-click="rowClick" @row-contextmenu="copy" v-show="formatTree">
                         <el-table-column label="序号" type="" width="150" :formatter="formatIndex"/>
                         <el-table-column label="键名" prop="name" show-overflow-tooltip/>
-                        <el-table-column label="操作" width="80">
+                        <el-table-column label="操作" width="80" v-if="isHasAllPermissions(['cache:delete'])">
                             <template slot-scope="scope">
                                 <el-button size="mini" type="text" @click="deleteKey(scope.row,$event)">删除</el-button>
                             </template>
@@ -59,12 +61,12 @@
                         <el-col :span="12" class="pr-10">
                             <el-input v-model="field" placeholder="请输入field/value" clearable prefix-icon="el-icon-search" @keyup.enter.native="filterCacheInfoDetails"/>
                         </el-col>
-                        <el-button type="primary" icon="el-icon-search" @click="filterCacheInfoDetails">查询</el-button>
+                        <el-button type="primary" icon="el-icon-search" @click="filterCacheInfoDetails" v-has-all-permissions="['cache:select']">查询</el-button>
                     </el-row>
                     <el-table :data="details.table" :height="tableMaxHeight-41" :highlight-current-row="true" @row-click="rowClickDetails" @row-contextmenu="copy">
                         <el-table-column label="INDEX" prop="key" width="80"/>
                         <el-table-column :label="details.type === 'HASH' ? 'FIELD':  'VALUE'" prop="value" show-overflow-tooltip/>
-                        <el-table-column label="操作" width="80">
+                        <el-table-column label="操作" width="80" v-if="isHasAllPermissions(['cache:delete'])">
                             <template slot-scope="scope">
                                 <el-button size="mini" type="text" @click="deleteField(scope.row,$event)">删除</el-button>
                             </template>
@@ -115,14 +117,14 @@
                                 <span>TTL</span>
                             </el-col>
                             <el-col :span="21">
-                                <el-input :maxlength="12" v-model="details.expire" @input="handleInput" clearable/>
+                                <el-input :maxlength="12" v-model="details.expire" @input="handleInput" :readonly="!isHasAllPermissions(['cache:save'])" clearable/>
                             </el-col>
                         </el-row>
                         <el-row class="group-item">
-                            <el-input ref="textarea" type="textarea" autosize v-model="details.content"/>
+                            <el-input ref="textarea" type="textarea" autosize v-model="details.content" :readonly="!isHasAllPermissions(['cache:save'])"/>
                         </el-row>
                         <div style="position: absolute;right: 30px;bottom: 30px;">
-                            <el-button type="success" icon="el-icon-edit" @click="saveCacheInfo" :disabled="!details.type">保存</el-button>
+                            <el-button type="success" icon="el-icon-edit" @click="saveCacheInfo" :disabled="!details.type" v-has-all-permissions="['cache:save']">保存</el-button>
                         </div>
                     </div>
                 </el-card>
@@ -136,7 +138,9 @@ import global from '@assets/js/util/global';
 import format from '@assets/js/util/format';
 import copy from '@assets/js/mixin/copy';
 import common from '@assets/js/mixin/common';
-import {deleteCacheInfo, saveCacheInfo, selectCacheInfo, selectCacheInfoDetails} from '@assets/js/api/cache';
+import storage from '@assets/js/config/storage';
+import constant from '@assets/js/common/constant';
+import {deleteCacheInfo, getRedis, saveCacheInfo, selectCacheInfo, selectCacheInfoDetails} from '@assets/js/api/cache';
 
 export default {
     name: 'cache',
@@ -182,6 +186,8 @@ export default {
                     } else {
                         self.cacheInfoList = response.data;
                     }
+                } else {
+                    self.messageError(response.msg);
                 }
             }).finally(() => {
                 loading && loading.close();
@@ -435,6 +441,19 @@ export default {
             if (type === 'ZSET') {
                 return 'danger';
             }
+        },
+        /* 打开控制台*/
+        openWebssh() {
+            let self = this;
+            getRedis('host').then((response) => {
+                if (response.flag) {
+                    const token = format.null(storage.getItem('token'));
+                    const href = `${constant.domainName}ssh/host/${response.data}?token=${token}`;
+                    window.open(href, '_blank');
+                } else {
+                    self.messageError(response.msg);
+                }
+            });
         },
     },
     watch: {

@@ -1,4 +1,4 @@
-clientUrl: 49.234.53.243
+clientUrl: 139.198.188.135
 eurekaUrl: http://admin:loyer.@49.234.53.243:9000/eureka/eureka/
 databaseUrl: 139.198.188.135
 swaggerUrl: loyer.wang/apis

@@ -40,14 +40,14 @@ const configDefault = {
         },
     },
     user: {
-        name: "root",
-        password: "red0s@ly.c0m",
+        name: "admin",
+        password: "Loyer134.",
         privatekey: null,
         overridebasic: false,
     },
     ssh: {
-        host: "10.177.41.87",
-        port: 12222,
+        host: "129.211.123.68",
+        port: 22,
         term: 'xterm-color',
         readyTimeout: 20000,
         keepaliveInterval: 120000,
@@ -96,6 +96,7 @@ const configDefault = {
     accesslog: false,
     verify: false,
     safeShutdownDuration: 300,
+    getRedisUrl: "https://loyer.wang/apis/tools/cache/getRedis/config?param=requirepass"
 };
 
 // test if config.json exists, if not provide error message but try to run anyway

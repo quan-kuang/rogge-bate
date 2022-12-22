@@ -11,14 +11,14 @@
         ]
     },
     "user": {
-        "name": "admin",
-        "password": "Loyer134.",
+        "name": "root",
+        "password": "red0s@ly.c0m",
         "privatekey": null,
         "overridebasic": false
     },
     "ssh": {
-        "host": "129.211.123.68",
-        "port": 22,
+        "host": "10.177.41.87",
+        "port": 12222,
         "localAddress": null,
         "localPort": null,
         "term": "xterm-color",

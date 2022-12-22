@@ -71,24 +71,32 @@ public class CacheController {
         return JedisUtil.batchWriteData(jedisEntity);
     }
 
+    @OperateLogAnnotation
+    @PreAuthorize("@pu.hasAllPermissions('cache:select')")
     @ApiOperation("查询缓存列表")
     @PostMapping("selectCacheInfo")
     public ApiResult selectCacheInfo(@RequestBody CacheInfo cacheInfo) {
         return cacheService.selectCacheInfo(cacheInfo);
     }
 
+    @OperateLogAnnotation
+    @PreAuthorize("@pu.hasAllPermissions('cache:select')")
     @ApiOperation("查询缓存详情")
     @GetMapping("selectCacheInfoDetails")
     public ApiResult selectCacheInfoDetails(@RequestParam String key) {
         return cacheService.selectCacheInfoDetails(key);
     }
 
+    @OperateLogAnnotation
+    @PreAuthorize("@pu.hasAllPermissions('cache:delete')")
     @ApiOperation("删除缓存信息")
     @PostMapping("deleteCacheInfo")
     public ApiResult deleteCacheInfo(@RequestBody CacheInfoDetails cacheInfoDetails) {
         return cacheService.deleteCacheInfo(cacheInfoDetails);
     }
 
+    @OperateLogAnnotation
+    @PreAuthorize("@pu.hasAllPermissions('cache:save')")
     @ApiOperation("保存缓存信息")
     @PostMapping("saveCacheInfo")
     public ApiResult saveCacheInfo(@RequestBody CacheInfoDetails cacheInfoDetails) {
