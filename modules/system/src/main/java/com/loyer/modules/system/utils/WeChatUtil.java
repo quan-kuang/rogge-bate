@@ -2,7 +2,6 @@ package com.loyer.modules.system.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.loyer.common.apis.server.ToolsServer;
-import com.loyer.common.core.constant.PrefixConst;
 import com.loyer.common.core.constant.SuffixConst;
 import com.loyer.common.core.utils.common.ParamsUtil;
 import com.loyer.common.core.utils.document.FileUtil;
@@ -11,11 +10,14 @@ import com.loyer.common.core.utils.reflect.ContextUtil;
 import com.loyer.common.core.utils.request.HttpUtil;
 import com.loyer.common.dedicine.constant.SystemConst;
 import com.loyer.common.dedicine.entity.ApiResult;
+import com.loyer.common.dedicine.entity.WeChatAlarm;
 import com.loyer.common.dedicine.enums.HintEnum;
 import com.loyer.common.dedicine.exception.BusinessException;
 import com.loyer.common.dedicine.utils.GeneralUtil;
 import com.loyer.common.dedicine.utils.StringUtil;
 import com.loyer.common.redis.utils.CacheUtil;
+import com.loyer.modules.system.constant.PrefixConst;
+import com.loyer.modules.system.entity.TemplateMessage;
 import com.loyer.modules.system.entity.TencentEntity;
 import com.loyer.modules.system.entity.WeChatConfig;
 import com.loyer.modules.system.inherit.WechatHttpMessageConverter;
@@ -27,10 +29,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 微信SDK工具类
@@ -43,8 +42,6 @@ public class WeChatUtil {
     private static final Logger logger = LoggerFactory.getLogger(WeChatUtil.class);
 
     private static final WeChatConfig WE_CHAT_CONFIG = ContextUtil.getBean(WeChatConfig.class);
-
-    private static final CacheUtil CACHE_UTIL = ContextUtil.getBean(CacheUtil.class);
 
     private static final String VOICE_PATH = SystemConst.LOCAL_FILE_PATH + "voice/";
 
@@ -137,6 +134,20 @@ public class WeChatUtil {
      * 获取accessToken令牌
      *
      * @author kuangq
+     * @date 2022-12-23 9:11
+     */
+    private static String getAccessToken() {
+        //设置默认appid和appSecret
+        TencentEntity.JsSdk jsSdk = new TencentEntity.JsSdk();
+        jsSdk.setAppId(WE_CHAT_CONFIG.getAppId());
+        jsSdk.setAppSecret(WE_CHAT_CONFIG.getAppSecret());
+        return getAccessToken(jsSdk);
+    }
+
+    /**
+     * 获取accessToken令牌
+     *
+     * @author kuangq
      * @date 2019-08-28 23:30
      */
     private static String getAccessToken(TencentEntity.JsSdk jsSdk) {
@@ -195,12 +206,8 @@ public class WeChatUtil {
      * @date 2020-07-08 19:05
      */
     public static ApiResult downloadMedia(String mediaId, ToolsServer toolsServer) {
-        TencentEntity.JsSdk jsSdk = new TencentEntity.JsSdk();
-        //设置默认appid和appSecret
-        jsSdk.setAppId(WE_CHAT_CONFIG.getAppId());
-        jsSdk.setAppSecret(WE_CHAT_CONFIG.getAppSecret());
         //获取接口入参accessToken
-        String accessToken = getAccessToken(jsSdk);
+        String accessToken = getAccessToken();
         //拼接获取媒体文件的url
         String getMediaUrl = String.format(WE_CHAT_CONFIG.getGetMediaUrl(), accessToken, mediaId);
         //获取接口返回的二进制文件
@@ -276,5 +283,68 @@ public class WeChatUtil {
         CacheUtil.STRING.set(key, authUserInfo, 3600 * 6);
         //加密用户昵称拼接到路由上
         return state + AesUtil.encrypt(authUserInfo.getNickname(), SystemConst.SECRET_KEY);
+    }
+
+    /**
+     * 发送微信告警
+     *
+     * @author kuangq
+     * @date 2022-12-23 10:22
+     */
+    public static ApiResult sendWeChatAlarm(WeChatAlarm weChatAlarm) {
+        String templateId = CacheUtil.HASH.get(PrefixConst.CONSTANT, PrefixConst.WECHAT_ALARM_TEMPLATE);
+        if (StringUtils.isBlank(templateId)) {
+            return ApiResult.hintEnum(HintEnum.HINT_1007);
+        }
+        List<TemplateMessage.Data> dataLis = new ArrayList<>();
+        dataLis.add(new TemplateMessage.Data("title", weChatAlarm.getTitle(), "#173177"));
+        dataLis.add(new TemplateMessage.Data("content", weChatAlarm.getContent(), "#173177"));
+        dataLis.add(new TemplateMessage.Data("date", weChatAlarm.getDate(), "#173177"));
+        TemplateMessage templateMessage = new TemplateMessage();
+        templateMessage.setTemplateId(templateId);
+        templateMessage.setDataList(dataLis);
+        return sendTemplateMessage(templateMessage);
+    }
+
+    /**
+     * 发送微信模板消息
+     *
+     * @author kuangq
+     * @date 2022-12-23 9:01
+     */
+    public static ApiResult sendTemplateMessage(TemplateMessage templateMessage) {
+        List<String> userIdList = StringUtils.isNotBlank(templateMessage.getUserId()) ? Collections.singletonList(templateMessage.getUserId()) : CacheUtil.LIST.range(PrefixConst.WECHAT_ALRAM_USERS);
+        if (userIdList.isEmpty()) {
+            return ApiResult.hintEnum(HintEnum.HINT_1008);
+        }
+        TencentEntity.TemplateMessageRequest templateMessageRequest = new TencentEntity.TemplateMessageRequest();
+        templateMessageRequest.setUrl(templateMessage.getUrl());
+        templateMessageRequest.setTopColor(templateMessage.getTopColor());
+        templateMessageRequest.setTemplateId(templateMessage.getTemplateId());
+        templateMessageRequest.setData(buildData(templateMessage.getDataList()));
+        String sendTemplateMessageUrl = String.format(WE_CHAT_CONFIG.getSendTemplateMessageUrl(), getAccessToken());
+        for (String userId : userIdList) {
+            templateMessageRequest.setToUser(userId);
+            TencentEntity.ErrorMsg errorMsg = HttpUtil.doPostJson(sendTemplateMessageUrl, templateMessageRequest, TencentEntity.ErrorMsg.class);
+            if (errorMsg.getErrcode() != 0) {
+                logger.error(JSON.toJSONString(errorMsg));
+                return ApiResult.failure(errorMsg.getErrmsg());
+            }
+        }
+        return ApiResult.success();
+    }
+
+    /**
+     * 构建模板消息内容
+     *
+     * @author kuangq
+     * @date 2022-12-23 10:01
+     */
+    private static Map<String, TencentEntity.TemplateMessageRequest.Data> buildData(List<TemplateMessage.Data> dataLis) {
+        Map<String, TencentEntity.TemplateMessageRequest.Data> dataMap = new HashMap<>();
+        for (TemplateMessage.Data data : dataLis) {
+            dataMap.put(data.getKey(), new TencentEntity.TemplateMessageRequest.Data(data.getValue(), data.getColor()));
+        }
+        return dataMap;
     }
 }

@@ -4,6 +4,8 @@ import com.loyer.common.apis.server.ToolsServer;
 import com.loyer.common.core.annotation.OperateLogAnnotation;
 import com.loyer.common.core.utils.common.ParamsUtil;
 import com.loyer.common.dedicine.entity.ApiResult;
+import com.loyer.common.dedicine.entity.WeChatAlarm;
+import com.loyer.modules.system.entity.TemplateMessage;
 import com.loyer.modules.system.entity.TencentEntity;
 import com.loyer.modules.system.utils.WeChatUtil;
 import com.loyer.modules.system.utils.XmlUtil;
@@ -93,5 +95,19 @@ public class WechatController {
         logger.info("【微信事件监听】{}", xmlStr);
         //将XML信息转换成MAP
         return ApiResult.success(XmlUtil.xmlToMap(xmlStr));
+    }
+
+    @OperateLogAnnotation
+    @ApiOperation("发送微信报警")
+    @PostMapping("sendWeChatAlarm")
+    public ApiResult sendWeChatAlarm(@RequestBody WeChatAlarm weChatAlarm) {
+        return WeChatUtil.sendWeChatAlarm(weChatAlarm);
+    }
+
+    @OperateLogAnnotation
+    @ApiOperation("发送微信模板消息")
+    @PostMapping("sendTemplateMessage")
+    public ApiResult sendTemplateMessage(@RequestBody TemplateMessage templateMessage) {
+        return WeChatUtil.sendTemplateMessage(templateMessage);
     }
 }

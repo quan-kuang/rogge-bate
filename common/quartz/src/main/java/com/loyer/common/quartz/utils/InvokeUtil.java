@@ -4,6 +4,7 @@ import com.loyer.common.core.constant.SpecialCharsConst;
 import com.loyer.common.core.utils.reflect.ContextUtil;
 import com.loyer.common.dedicine.enums.HintEnum;
 import com.loyer.common.dedicine.exception.BusinessException;
+import com.loyer.common.dedicine.utils.ExceptionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
@@ -36,18 +37,11 @@ public class InvokeUtil {
             Map<Class<?>[], Object[]> methodParams = getMethodParams(invokeTarget);
             //动态调用
             return invokeMethod(instance, methodName, methodParams, isInvoke);
-        } catch (ClassNotFoundException e) {
-            throw new BusinessException(HintEnum.HINT_1032, e);
-        } catch (IllegalAccessException e) {
-            throw new BusinessException(HintEnum.HINT_1030, e);
-        } catch (InstantiationException e) {
-            throw new BusinessException(HintEnum.HINT_1036, e);
-        } catch (NoSuchMethodException e) {
-            throw new BusinessException(HintEnum.HINT_1029, e);
-        } catch (InvocationTargetException e) {
-            throw new BusinessException(HintEnum.HINT_1031, e.getCause().getMessage());
-        } catch (NoSuchBeanDefinitionException e) {
-            throw new BusinessException(e.getMessage(), invokeTarget);
+        } catch (Exception e) {
+            if (e.getCause() != null && e.getCause() instanceof BusinessException) {
+                throw (BusinessException) e.getCause();
+            }
+            throw new BusinessException(ExceptionUtil.getErrorMessage(e));
         }
     }
 

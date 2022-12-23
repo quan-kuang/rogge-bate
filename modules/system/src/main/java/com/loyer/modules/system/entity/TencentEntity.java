@@ -1,9 +1,13 @@
 package com.loyer.modules.system.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
 
 /**
  * 腾讯云API实体类
@@ -21,6 +25,8 @@ public class TencentEntity {
         private Integer errcode;
         //异常说明
         private String errmsg;
+        //消息id
+        private String msgid;
     }
 
     @Data
@@ -180,6 +186,33 @@ public class TencentEntity {
                 //异常信息说明
                 private String Message;
             }
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class TemplateMessageRequest {
+
+        @JSONField(name = "touser")
+        private String toUser;
+
+        @JSONField(name = "template_id")
+        private String templateId;
+
+        @JSONField(name = "topcolor")
+        private String topColor;
+
+        private String url;
+
+        private Map<String, TemplateMessageRequest.Data> data;
+
+        @lombok.Data
+        @AllArgsConstructor
+        public static class Data {
+
+            private String value;
+
+            private String color;
         }
     }
 }

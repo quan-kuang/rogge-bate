@@ -2,10 +2,13 @@ package com.loyer.common.quartz.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.loyer.common.apis.server.MessageServer;
+import com.loyer.common.apis.server.SystemServer;
+import com.loyer.common.core.enums.DatePattern;
 import com.loyer.common.core.utils.common.DateUtil;
 import com.loyer.common.core.utils.reflect.BeanUtil;
 import com.loyer.common.core.utils.reflect.ContextUtil;
-import com.loyer.common.dedicine.exception.BusinessException;
+import com.loyer.common.dedicine.entity.ApiResult;
+import com.loyer.common.dedicine.entity.WeChatAlarm;
 import com.loyer.common.dedicine.utils.GeneralUtil;
 import com.loyer.common.quartz.constant.CrontabConst;
 import com.loyer.common.quartz.entity.Crontab;
@@ -27,10 +30,9 @@ public abstract class CrontabHandler implements Job {
 
     private static final Logger logger = LoggerFactory.getLogger(CrontabHandler.class);
 
-    private static final MessageServer MESSAGE_SERVER = ContextUtil.getBean(MessageServer.class);
+    private static final SystemServer SYSTEM_SERVER = ContextUtil.getBean(SystemServer.class);
 
-    //创建线程变量，存储任务开始时间
-    private static final ThreadLocal<Long> START_TIME = new ThreadLocal<>();
+    private static final MessageServer MESSAGE_SERVER = ContextUtil.getBean(MessageServer.class);
 
     /**
      * 执行定时任务
@@ -44,19 +46,20 @@ public abstract class CrontabHandler implements Job {
         Crontab target = new Crontab();
         BeanUtil.copyBean(source, target);
         CrontabLog crontabLog = new CrontabLog();
+        long startTime = System.currentTimeMillis();
         try {
-            doBefore(target, crontabLog);
+            doBefore(target, crontabLog, startTime);
             Object result = doExecute(jobExecutionContext, target);
-            doAfter(target, crontabLog, result);
+            doAfter(crontabLog, result);
         } catch (Exception e) {
+            e.printStackTrace();
             crontabLog.setStatus(false);
-            String errorMessage = e.getMessage();
-            if (e instanceof BusinessException) {
-                errorMessage += ": " + ((BusinessException) e).getData().toString();
-            }
-            crontabLog.setErrorMessage(errorMessage);
-            logger.error("【定时任务执行失败】{}：{}", target.getName(), errorMessage);
+            crontabLog.setResult(e.getMessage());
+            sendWeChatAlarm(target.getName(), e.getMessage());
+            logger.error("【定时任务执行失败】{}：{}", target.getName(), e.getMessage());
         } finally {
+            crontabLog.setElapsedTime(DateUtil.getTdoa(startTime));
+            logger.info("【定时任务执行时长】{}：{}", target.getName(), crontabLog.getElapsedTime());
             MESSAGE_SERVER.saveCrontabLog(crontabLog);
         }
     }
@@ -75,9 +78,7 @@ public abstract class CrontabHandler implements Job {
      * @author kuangq
      * @date 2020-12-17 16:33
      */
-    private void doBefore(Crontab crontab, CrontabLog crontabLog) {
-        long startTime = System.currentTimeMillis();
-        START_TIME.set(startTime);
+    private void doBefore(Crontab crontab, CrontabLog crontabLog, long startTime) {
         crontabLog.setUuid(GeneralUtil.getUuid());
         crontabLog.setCrontabId(crontab.getUuid());
         crontabLog.setCrontabName(crontab.getName());
@@ -91,18 +92,36 @@ public abstract class CrontabHandler implements Job {
      * @author kuangq
      * @date 2020-12-17 16:34
      */
-    private void doAfter(Crontab crontab, CrontabLog crontabLog, Object result) {
-        //记录请求时长
-        Long startTime = START_TIME.get();
-        START_TIME.remove();
-        Double elapsedTime = DateUtil.getTdoa(startTime);
-        crontabLog.setElapsedTime(elapsedTime);
+    private void doAfter(CrontabLog crontabLog, Object result) {
         //默认调用成功
         crontabLog.setStatus(true);
         //设置任务返回结果
         if (result != null) {
-            crontabLog.setResult(JSON.toJSONString(result));
+            if (result instanceof ApiResult) {
+                ApiResult apiResult = (ApiResult) result;
+                crontabLog.setStatus(apiResult.getFlag());
+                crontabLog.setResult(apiResult.getMsg());
+                Object data = apiResult.getData();
+                if (apiResult.getFlag() && data != null) {
+                    crontabLog.setResult(data instanceof String ? data.toString() : JSON.toJSONString(data));
+                }
+            } else {
+                crontabLog.setResult(result instanceof String ? result.toString() : JSON.toJSONString(result));
+            }
         }
-        logger.info("【定时任务执行时长】{}：{}", crontab.getName(), elapsedTime);
+    }
+
+    /**
+     * 发送微信报警
+     *
+     * @author kuangq
+     * @date 2022-12-23 10:39
+     */
+    private void sendWeChatAlarm(String name, String message) {
+        WeChatAlarm weChatAlarm = new WeChatAlarm();
+        weChatAlarm.setTitle(name);
+        weChatAlarm.setContent(message);
+        weChatAlarm.setDate(DateUtil.getTimestamp(System.currentTimeMillis(), DatePattern.YMD_HMS_1));
+        SYSTEM_SERVER.sendWeChatAlarm(weChatAlarm);
     }
 }

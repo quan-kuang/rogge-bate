@@ -3,14 +3,14 @@
         <panel-title title="新增常量信息表"/>
         <el-form ref="form" label-width="100px" :model="form" :rules="rules" lstatus-icon>
             <el-row>
-                <el-col :span="8">
+                <el-col :span="6">
                     <el-form-item label="键名" prop="key">
                         <el-input v-model="form.key" placeholder="请输入键名" maxlength="36" clearable/>
                     </el-form-item>
                 </el-col>
-                <el-col :span="8">
+                <el-col :span="10">
                     <el-form-item label="键值" prop="value">
-                        <el-input v-model="form.value" placeholder="请输入键值" maxlength="18" clearable/>
+                        <el-input v-model="form.value" placeholder="请输入键值" maxlength="180" clearable style="width: 100%"/>
                     </el-form-item>
                 </el-col>
             </el-row>

@@ -38,6 +38,11 @@ public class SystemDemote implements FallbackFactory<SystemServer> {
             public ApiResult insertCrontabLog(Object crontabLog) {
                 return apiResult;
             }
+
+            @Override
+            public ApiResult sendWeChatAlarm(Object weChatAlarm) {
+                return apiResult;
+            }
         };
     }
 }

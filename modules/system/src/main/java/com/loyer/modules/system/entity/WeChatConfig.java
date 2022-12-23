@@ -43,4 +43,7 @@ public class WeChatConfig {
 
     @ApiModelProperty("微信网页授权获取用户信息的接口地址")
     private String getUserInfoUrl;
+
+    @ApiModelProperty("微信发送模板消息的接口地址")
+    private String sendTemplateMessageUrl;
 }

@@ -1,6 +1,8 @@
 package com.loyer.modules.monitor.config;
 
 import com.loyer.common.apis.server.MessageServer;
+import com.loyer.common.apis.server.SystemServer;
+import com.loyer.common.dedicine.entity.WeChatAlarm;
 import com.loyer.modules.monitor.entity.MessageParams;
 import de.codecentric.boot.admin.server.domain.entities.Instance;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
@@ -29,10 +31,13 @@ public class AlarmConfig extends AbstractStatusChangeNotifier {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final SystemServer systemServer;
+
     private final MessageServer messageServer;
 
-    public AlarmConfig(InstanceRepository repository, MessageServer messageServer) {
+    public AlarmConfig(InstanceRepository repository, SystemServer systemServer, MessageServer messageServer) {
         super(repository);
+        this.systemServer = systemServer;
         this.messageServer = messageServer;
     }
 
@@ -44,13 +49,23 @@ public class AlarmConfig extends AbstractStatusChangeNotifier {
     }
 
     private void sendAlarm(Instance instance) {
+        Date date = new Date();
         Registration registration = instance.getRegistration();
         List<String> messageList = new ArrayList<>();
         messageList.add(registration.getName());
         messageList.add(StringUtils.substringBetween(registration.getServiceUrl(), "//", ":"));
         messageList.add(StringUtils.substringAfterLast(registration.getServiceUrl(), ":"));
-        messageList.add(new SimpleDateFormat("MM-dd HH:mm").format(new Date()));
+        messageList.add(new SimpleDateFormat("MM-dd HH:mm").format(date));
         MessageParams messageParams = MessageParams.of(messageList);
         messageServer.sendMessage(messageParams);
+        sendWeChatAlarm(registration, date);
+    }
+
+    private void sendWeChatAlarm(Registration registration, Date date) {
+        WeChatAlarm weChatAlarm = new WeChatAlarm();
+        weChatAlarm.setTitle(String.format("%s服务异常", registration.getName()));
+        weChatAlarm.setContent(registration.getServiceUrl());
+        weChatAlarm.setDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+        systemServer.sendWeChatAlarm(weChatAlarm);
     }
 }

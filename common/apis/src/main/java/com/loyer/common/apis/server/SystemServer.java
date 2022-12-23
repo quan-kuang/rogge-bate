@@ -27,4 +27,8 @@ public interface SystemServer {
     /*保存定时任务日志*/
     @PostMapping("crontab/insertCrontabLog")
     ApiResult insertCrontabLog(@RequestBody Object crontabLog);
+
+    /*发送微信告警*/
+    @PostMapping("wechat/sendWeChatAlarm")
+    ApiResult sendWeChatAlarm(@RequestBody Object weChatAlarm);
 }
