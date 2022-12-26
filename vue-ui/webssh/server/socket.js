@@ -57,6 +57,74 @@ async function checkSubnet(socket) {
     }
 }
 
+/*input check*/
+function checkParams(redis, conn, socket) {
+    const host = redis.host
+    const token = redis.token
+
+    if (!host) {
+        logDebug(socket, `PARAMS ERROR: REDIS HOST CAN NOT BE BLANK`);
+        logError(socket, 'PARAMS ERROR', 'REDIS HOST CAN NOT BE BLANK');
+        conn.end();
+        socket.disconnect(true);
+        return false
+    }
+
+    const regExp = /^((([1-9]?\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}([1-9]?\d|1\d{2}|2[0-4]\d|25[0-5])):([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
+    if (!regExp.test(host)) {
+        logDebug(socket, `PARAMS ERROR: THIS IS AN INVALID REDIS HOST`);
+        logError(socket, 'PARAMS ERROR', 'THIS IS AN INVALID REDIS HOST');
+        conn.end();
+        socket.disconnect(true);
+        return false
+    }
+
+    if (!token) {
+        logDebug(socket, `PARAMS ERROR: TOKEN CAN NOT BE BLANK`);
+        logError(socket, 'PARAMS ERROR', 'TOKEN CAN NOT BE BLANK');
+        conn.end();
+        socket.disconnect(true);
+        return false
+    }
+
+    socket.emit('title', host);
+    return true
+}
+
+/*connect redis*/
+async function initLogin(redis, conn, socket, stream) {
+    const headers = cipher.getHeaders(redis.token);
+    const response = await request.get(redis.params.getRedisUrl, {headers: headers}).catch((errMsg) => {
+        logDebug(socket, `TOKEN INVALID: ${errMsg}`);
+        logError(socket, 'TOKEN INVALID', errMsg);
+        conn.end();
+        socket.disconnect(true);
+    });
+
+    logInfo(socket, response);
+    const result = JSON.parse(response);
+    if (!result.flag) {
+        logDebug(socket, `TOKEN INVALID: ${result.msg}`);
+        logError(socket, 'TOKEN INVALID', result.msg);
+        conn.end();
+        socket.disconnect(true);
+        return
+    }
+    const password = result.data.requirepass;
+    const hostAry = redis.host.split(':')
+    const ip = hostAry[0]
+    const port = hostAry[1]
+
+    let command;
+    if (password) {
+        command = `redis-cli -c -h ${ip} -p ${port} -a ${password} \r`
+    } else {
+        command = `redis-cli -c -h ${ip} -p ${port} \r`
+    }
+    logInfo(socket, command);
+    stream.write(command);
+}
+
 // public
 module.exports = function appSocket(socket) {
     let login = false;
@@ -129,31 +197,6 @@ module.exports = function appSocket(socket) {
                     socket.disconnect(true);
                 });
 
-                const host = redis.host
-                const token = redis.token
-                socket.emit('title', host);
-
-                const headers = cipher.getHeaders();
-                headers.token = token;
-
-                const response = await request.get(redis.getRedisUrl, {headers: headers}).catch((errMsg) => {
-                    logDebug(socket, `TOKEN INVALID: ${errMsg}`);
-                    logError(socket, 'TOKEN INVALID', errMsg);
-                    conn.end();
-                    socket.disconnect(true);
-                });
-
-                logInfo(socket, response);
-                const result = JSON.parse(response);
-                if (!result.flag) {
-                    logDebug(socket, `TOKEN INVALID: ${result.msg}`);
-                    logError(socket, 'TOKEN INVALID', result.msg);
-                    conn.end();
-                    socket.disconnect(true);
-                    return
-                }
-                const password = result.data.requirepass;
-
                 socket.on('control', (controlData) => {
                     if (controlData === 'replayCredentials' && socket.request.session.ssh.allowreplay) {
                         // stream.write(`${socket.request.session.userpassword}\n`);
@@ -166,18 +209,9 @@ module.exports = function appSocket(socket) {
                     logDebug(socket, `SOCKET RESIZE: ${JSON.stringify([data.rows, data.cols])}`);
                 });
 
-                const hostAry = redis.host.split(':')
-                const ip = hostAry[0]
-                const port = hostAry[1]
-
-                let command;
-                if (password) {
-                    command = `redis-cli -c -h ${ip} -p ${port} -a ${password} \r`
-                } else {
-                    command = `redis-cli -c -h ${ip} -p ${port} \r`
+                if (checkParams(redis, conn, socket)) {
+                    await initLogin(redis, conn, socket, stream)
                 }
-                logInfo(socket, command);
-                stream.write(command);
 
                 socket.on('data', (data) => {
                     if (data[0].charCodeAt(0) === 3) {

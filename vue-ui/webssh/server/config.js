@@ -96,7 +96,9 @@ const configDefault = {
     accesslog: false,
     verify: false,
     safeShutdownDuration: 300,
-    getRedisUrl: "https://loyer.wang/apis/tools/cache/getRedis/config?param=requirepass"
+    params: {
+        getRedisUrl: "https://loyer.wang/apis/tools/cache/getRedis/config?param=requirepass"
+    }
 };
 
 // test if config.json exists, if not provide error message but try to run anyway

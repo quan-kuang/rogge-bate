@@ -81,5 +81,7 @@
     "accesslog": false,
     "verify": false,
     "safeShutdownDuration": 300,
-    "getRedisUrl": "http://loyer.com:9010/tools/cache/getRedis/config?param=requirepass"
+    "params": {
+        "getRedisUrl": "http://loyer.com:9010/tools/cache/getRedis/config?param=requirepass"
+    }
 }

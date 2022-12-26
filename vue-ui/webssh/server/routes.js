@@ -23,24 +23,6 @@ exports.connect = async function connect(req, res) {
         lineHeight,
     } = config.terminal;
 
-    const token = req.query.token;
-    if (!token) {
-        res.status(403).send("token can not be blank");
-        return
-    }
-
-    const redisHost = req.params.host
-    if (!redisHost) {
-        res.status(403).send("redis host can not be blank");
-        return
-    }
-
-    const regExp = /^((([1-9]?\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}([1-9]?\d|1\d{2}|2[0-4]\d|25[0-5])):([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
-    if (!regExp.test(redisHost)) {
-        res.status(403).send("this is an invalid redis host");
-        return
-    }
-
     if (req.method === 'POST' && req.body.username && req.body.userpassword) {
         req.session.username = req.body.username;
         req.session.userpassword = req.body.userpassword;
@@ -130,9 +112,9 @@ exports.connect = async function connect(req, res) {
         host,
         port,
         redis: {
-            token: token,
-            host: redisHost,
-            getRedisUrl: config['getRedisUrl'],
+            host: req.params.host,
+            token: req.query.token,
+            params: config.params,
         },
         localAddress: config.ssh.localAddress,
         localPort: config.ssh.localPort,

@@ -35,12 +35,12 @@ cipher.decryptDES = (message) => {
 };
 
 /* 设置统一请求headers*/
-cipher.getHeaders = () => {
+cipher.getHeaders = (token) => {
     const noncestr = cipher.getUuid();
     const timestamp = new Date().getTime();
     const desEncryptStr = cipher.encryptDES(`${noncestr}&${timestamp}`);
     const md5EncryptStr = cipher.encryptMD5(desEncryptStr);
-    return {noncestr: noncestr, timestamp: timestamp, signature: md5EncryptStr};
+    return {noncestr: noncestr, timestamp: timestamp, signature: md5EncryptStr, token: token};
 };
 
 module.exports = cipher;
