@@ -1,6 +1,5 @@
 package com.loyer.common.apis.demote;
 
-import com.alibaba.fastjson.JSONObject;
 import com.loyer.common.apis.server.SystemServer;
 import com.loyer.common.dedicine.entity.ApiResult;
 import feign.hystrix.FallbackFactory;
@@ -24,8 +23,9 @@ public class SystemDemote implements FallbackFactory<SystemServer> {
         ApiResult apiResult = ApiResult.failure(throwable);
         logger.error("SYSTEM服务异常：{}", apiResult.getMsg());
         return new SystemServer() {
+
             @Override
-            public ApiResult selectUser(JSONObject user) {
+            public ApiResult loadUserByUsername(String type, String username) {
                 return apiResult;
             }
 

@@ -7,6 +7,11 @@
         SELECT a.uuid, a.account, a.password, a.name, a.id_card, a.sex, a.birthday, a.phone, a.email, a.avatar, a.dept_id, a.auth, a.status, a.remark, a.creator_id, a.creator_name, a.create_time, a.update_time, a.login_time
     </sql>
 
+    <!--查询用户信息-->
+    <select id="loadUserByUsername" parameterType="java.lang.String" resultType="com.loyer.common.core.entity.User">
+        <include refid="selectUserSql"/>FROM users a WHERE a.${type} = #{username}
+    </select>
+
     <!--保存用户信息（主键存在则更新）-->
     <insert id="saveUser" parameterType="com.loyer.common.core.entity.User">
         INSERT INTO users (uuid, account, password, name, id_card, sex, birthday, phone, email, avatar, dept_id, auth, status, remark, creator_id, creator_name)

@@ -21,7 +21,6 @@ import com.loyer.common.security.annotation.PermissionAnnotation;
 import com.loyer.common.security.aspect.PermissionAspect;
 import com.loyer.common.security.entity.LoginUser;
 import com.loyer.common.security.enums.PermissionType;
-import com.loyer.common.security.service.UserDetailsServiceImpl;
 import com.loyer.common.security.utils.SecurityUtil;
 import com.loyer.modules.system.enums.CaptchaType;
 import com.loyer.modules.system.mapper.postgresql.DeptMapper;
@@ -70,8 +69,25 @@ public class UserServiceImpl implements UserService {
     @Resource
     private OnLineUserService onLineUserService;
 
-    @Resource
-    private UserDetailsServiceImpl userDetailsService;
+    /**
+     * 根据账户查询用户
+     *
+     * @author kuangq
+     * @date 2022-12-28 9:37
+     */
+    @Override
+    public ApiResult loadUserByUsername(String type, String username) {
+        //获取用户信息
+        User user = userMapper.loadUserByUsername(type, username);
+        if (user == null) {
+            return ApiResult.hintEnum(HintEnum.HINT_1041);
+        }
+        //判断用户禁用
+        if (!user.getStatus()) {
+            return ApiResult.hintEnum(HintEnum.HINT_1042);
+        }
+        return ApiResult.success(user);
+    }
 
     /**
      * 登录
@@ -138,21 +154,27 @@ public class UserServiceImpl implements UserService {
     @Override
     public ApiResult messageLogin(User user) {
         //根据手机号查询用户信息
-        User result = userDetailsService.selectUser("phone", user.getAccount());
+        ApiResult apiResult = loadUserByUsername("phone", user.getAccount());
+        if (!apiResult.getFlag()) {
+            return apiResult;
+        }
         //校验验证码失效
         String key = PrefixConst.CAPTCHA + user.getAccount();
         if (!CacheUtil.KEY.has(key)) {
-            throw new BusinessException(HintEnum.HINT_1086);
+            return ApiResult.hintEnum(HintEnum.HINT_1086);
         }
         //校验短信验证码
-        if (!CacheUtil.STRING.get(key).equals(user.getPassword())) {
-            throw new BusinessException(HintEnum.HINT_1087);
+        if (!CacheUtil.STRING.get(key).toString().equals(user.getPassword())) {
+            return ApiResult.hintEnum(HintEnum.HINT_1087);
         }
         //删除缓存
         CacheUtil.KEY.delete(key);
+        user = (User) apiResult.getData();
+        //添加角色属性
+        user.setRoleIds(userMapper.selectUserLink(user.getUuid()));
         //登录设置
         LoginUser loginUser = new LoginUser();
-        loginUser.setUser(result);
+        loginUser.setUser(user);
         return ApiResult.success(loginAfter(loginUser));
     }
 

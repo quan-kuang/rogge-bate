@@ -1,11 +1,9 @@
 package com.loyer.common.apis.server;
 
-import com.alibaba.fastjson.JSONObject;
 import com.loyer.common.apis.demote.SystemDemote;
 import com.loyer.common.dedicine.entity.ApiResult;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 系统服务
@@ -17,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface SystemServer {
 
     /*查询用户信息*/
-    @PostMapping("user/selectUser")
-    ApiResult selectUser(@RequestBody JSONObject user);
+    @GetMapping("user/loadUserByUsername/{type}")
+    ApiResult loadUserByUsername(@PathVariable String type, @RequestParam String username);
 
     /*保存操作日志*/
     @PostMapping("log/insertOperateLog")

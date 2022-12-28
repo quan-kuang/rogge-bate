@@ -1,6 +1,7 @@
 package com.loyer.modules.system.mapper.postgresql;
 
 import com.loyer.common.core.entity.User;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -11,6 +12,8 @@ import java.util.List;
  * @date 2020-05-13 10:05
  */
 public interface UserMapper {
+
+    User loadUserByUsername(@Param("type") String type, @Param("username") String username);
 
     Integer saveUser(User user);
 

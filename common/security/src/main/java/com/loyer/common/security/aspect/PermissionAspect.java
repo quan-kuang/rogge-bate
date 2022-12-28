@@ -109,11 +109,8 @@ public class PermissionAspect {
         //获取用户信息
         User user = SecurityUtil.getLoginUser().getUser();
         //获取实体类基类
-        BaseEntity baseEntity = (BaseEntity) joinPoint.getArgs()[0];
-        Map<String, Object> params = baseEntity.getParams();
-        if (params == null) {
-            params = new HashMap<>(16);
-        }
+        BaseEntity baseEntity = joinPoint.getArgs().length == 0 ? new BaseEntity() : (BaseEntity) joinPoint.getArgs()[0];
+        Map<String, Object> params = baseEntity.getParams() == null ? new HashMap<>(8) : baseEntity.getParams();
         //设置权限过滤条件
         params.putAll(getPermissionFilter(user));
         baseEntity.setParams(params);

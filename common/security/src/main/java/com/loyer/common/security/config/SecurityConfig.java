@@ -76,8 +76,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/favicon.ico", "/static/**").permitAll()
                 //放行swagger相关资源
                 .antMatchers("/webjars/**", "/swagger-resources/**", "/swagger-ui.html", "/v2/api-docs", "/doc.html", "/csrf").permitAll()
-                //放行测试接口
-                .antMatchers("/", "/demo/**").permitAll()
+                //放行检测、测试接口
+                .antMatchers("/", "/actuator", "/actuator/health", "/demo/**").permitAll()
                 //特殊接口允许匿名访问，不允许已登入用户访问sendCaptcha
                 .antMatchers("/user/login", "/user/messageLogin", "/util/getCaptcha", "/news/sendCaptcha", "/wechat/link", "/wechat/getAuthUserInfo", "/websocket/*/*/*/*").anonymous()
                 //anyRequest匹配所有路径请求，除上面的都需要鉴权

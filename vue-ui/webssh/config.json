@@ -11,14 +11,14 @@
         ]
     },
     "user": {
-        "name": "root",
-        "password": "red0s@ly.c0m",
+        "name": "redis",
+        "password": "redis",
         "privatekey": null,
         "overridebasic": false
     },
     "ssh": {
-        "host": "10.177.41.87",
-        "port": 12222,
+        "host": "129.211.123.68",
+        "port": 22,
         "localAddress": null,
         "localPort": null,
         "term": "xterm-color",

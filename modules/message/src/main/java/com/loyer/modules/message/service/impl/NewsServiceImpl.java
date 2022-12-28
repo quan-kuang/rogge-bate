@@ -1,6 +1,7 @@
 package com.loyer.modules.message.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.loyer.common.apis.server.SystemServer;
 import com.loyer.common.core.constant.PrefixConst;
 import com.loyer.common.core.entity.ConsoleLog;
 import com.loyer.common.core.enums.RegExp;
@@ -11,7 +12,6 @@ import com.loyer.common.dedicine.utils.GeneralUtil;
 import com.loyer.common.rabbitmq.enums.MessageTemplate;
 import com.loyer.common.rabbitmq.utils.SendMessageUtil;
 import com.loyer.common.redis.utils.CacheUtil;
-import com.loyer.common.security.service.UserDetailsServiceImpl;
 import com.loyer.modules.message.entity.MailParams;
 import com.loyer.modules.message.entity.MessageParams;
 import com.loyer.modules.message.service.NewsService;
@@ -40,7 +40,7 @@ public class NewsServiceImpl implements NewsService {
     private MailUtil mailUtil;
 
     @Resource
-    private UserDetailsServiceImpl userDetailsService;
+    private SystemServer systemServer;
 
     @Override
     public ApiResult sendMail(MailParams mailParams) {
@@ -73,7 +73,10 @@ public class NewsServiceImpl implements NewsService {
             return ApiResult.failure("手机号格式错误", phone);
         }
         //根据手机号查询用户信息
-        userDetailsService.selectUser("phone", phone);
+        ApiResult apiResult = systemServer.loadUserByUsername("phone", phone);
+        if (!apiResult.getFlag()) {
+            return apiResult;
+        }
         //截取入参第一个数字设置生成几位随机数
         String firstNumber = messageParams.getTemplateParams().substring(0, 1);
         int digit = CheckParamsUtil.regularCheck(RegExp.INTEGER, firstNumber) ? Integer.parseInt(firstNumber) : 6;
@@ -81,7 +84,7 @@ public class NewsServiceImpl implements NewsService {
         String random = GeneralUtil.getRandom(digit);
         messageParams.setTemplateParams(random);
         //发送短信
-        ApiResult apiResult = MessageUtil.sendMessage(messageParams);
+        apiResult = MessageUtil.sendMessage(messageParams);
         //加入缓存
         if (apiResult.getFlag()) {
             CacheUtil.STRING.set(PrefixConst.CAPTCHA + phone, random, 180);

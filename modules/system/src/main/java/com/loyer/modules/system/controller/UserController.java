@@ -27,6 +27,13 @@ public class UserController {
     @Resource
     private UserService userService;
 
+    @ThrottlingAnnotation(count = 100)
+    @ApiOperation("查询用户信息")
+    @GetMapping("loadUserByUsername/{type}")
+    public ApiResult loadUserByUsername(@PathVariable String type, @RequestParam String username) {
+        return userService.loadUserByUsername(type, username);
+    }
+
     @OperateLogAnnotation
     @ApiOperation("登录")
     @PostMapping("login")
@@ -49,7 +56,6 @@ public class UserController {
         return userService.saveUser(user);
     }
 
-    @ThrottlingAnnotation(count = 100)
     @OperateLogAnnotation
     @PreAuthorize("@pu.hasAllPermissions('user:select')")
     @ApiOperation("查询用户信息")

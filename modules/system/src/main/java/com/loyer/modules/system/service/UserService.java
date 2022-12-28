@@ -12,6 +12,8 @@ import com.loyer.common.security.entity.LoginUser;
  */
 public interface UserService {
 
+    ApiResult loadUserByUsername(String type, String username);
+
     ApiResult login(LoginUser loginUser);
 
     ApiResult messageLogin(User user);
