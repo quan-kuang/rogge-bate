@@ -16,6 +16,7 @@
                         </el-col>
                         <el-button type="primary" icon="el-icon-search" @click="selectCacheInfo" @contextmenu.prevent.native="setFormatTree" v-has-all-permissions="['cache:select']">查询</el-button>
                         <el-button type="info" icon="el-icon-sort" @click="foldAll" v-show="formatTree">折叠</el-button>
+                        <el-button type="success" icon="el-icon-circle-plus-outline" @click="openCreateKeyDialog" v-has-all-permissions="['cache:save']">新增</el-button>
                     </el-row>
                     <!--列表结构-->
                     <el-table :data="cacheInfoList" :highlight-current-row="true" :height="tableMaxHeight-41" @row-click="rowClickLine" @row-contextmenu="copy" v-show="!formatTree">
@@ -130,6 +131,106 @@
                 </el-card>
             </el-col>
         </el-row>
+        <!--新增弹窗-->
+        <el-dialog title="新增缓存" :visible.sync="createKeyDialog" :close-on-click-modal="false" width="35%">
+            <el-form ref="form" :model="addForm" :rules="rules" label-width="60px">
+                <el-row>
+                    <el-col :span="11">
+                        <el-form-item label="类型" prop="type">
+                            <el-select v-model="addForm.type" clearable>
+                                <el-option v-for="(item, index) of typeAry" :key="index" :value="item" :label="item" :disabled="item==='ZSET'"/>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="过期" prop="expire" class="required">
+                            <el-input v-model="addForm.expire " type="number" :min="-1" style="width: 91.6%" clearable/>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-form-item label="键名" prop="key" class="required">
+                    <el-col :span="20">
+                        <el-input v-model="addForm.key" style="width: 100%" clearable/>
+                    </el-col>
+                </el-form-item>
+                <el-form-item label="键值" v-if="addForm.type==='STRING'" class="required" prop="value">
+                    <el-col :span="20">
+                        <el-input class="addFormValue" ref="addFormValue" v-model="addForm.value" type="textarea" autosize clearable style="width: 100%"/>
+                    </el-col>
+                </el-form-item>
+                <el-form-item label="键值" v-else-if="addForm.type==='SET'" class="required" prop="value">
+                    <el-row class="form-item-th">
+                        <el-col :span="21">
+                            <span>Member</span>
+                        </el-col>
+                        <el-col :span="3">
+                            <span>Action</span>
+                        </el-col>
+                    </el-row>
+                    <div style="max-height: 320px;overflow-y: auto;">
+                        <el-row :class="index>0?'form-item-tr':'form-item-tt'" v-for="(item, index) in addForm.set" :key="index">
+                            <el-col :span="21">
+                                <el-input v-model="addForm.set[index]" style="width: 95.1%" clearable class="set-value cache-value"/>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-button size="mini" type="text" :icon="getIcon(index,'set')" @click="operateRow(index,'set')"/>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-form-item>
+                <el-form-item label="键值" v-else-if="addForm.type==='LIST'" class="required" prop="value">
+                    <el-row class="form-item-th">
+                        <el-col :span="21">
+                            <span>Value</span>
+                        </el-col>
+                        <el-col :span="3">
+                            <span>Action</span>
+                        </el-col>
+                    </el-row>
+                    <div style="max-height: 320px;overflow-y: auto;">
+                        <el-row :class="index>0?'form-item-tr':'form-item-tt'" v-for="(item, index) in addForm.list" :key="index">
+                            <el-col :span="21">
+                                <el-input v-model="addForm.list[index]" style="width: 95.1%" clearable class="list-value cache-value"/>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-button size="mini" type="text" :icon="getIcon(index,'list')" @click="operateRow(index,'list')"/>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-form-item>
+                <el-form-item label="键值" v-else-if="addForm.type==='HASH'" class="required" prop="value">
+                    <el-row class="form-item-th">
+                        <el-col :span="11">
+                            <span>Field</span>
+                        </el-col>
+                        <el-col :span="10">
+                            <span>Value</span>
+                        </el-col>
+                        <el-col :span="3">
+                            <span>Action</span>
+                        </el-col>
+                    </el-row>
+                    <div style="max-height: 320px;overflow-y: auto;">
+                        <el-row :class="index>0?'form-item-tr':'form-item-tt'" v-for="(item, index) in addForm.hash" :key="index">
+                            <el-col :span="11">
+                                <el-input v-model="addForm.hash[index].field" clearable class="field-value cache-value"/>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-input v-model="addForm.hash[index].value" clearable class="value-value cache-value"/>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-button size="mini" type="text" :icon="getIcon(index,'hash')" @click="operateRow(index,'hash')"/>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="insertCacheInfo">保存</el-button>
+                    <el-button type="info" @click="resetForm">重置</el-button>
+                    <el-button @click="createKeyDialog=false">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
     </div>
 </template>
 
@@ -140,12 +241,40 @@ import copy from '@assets/js/mixin/copy';
 import common from '@assets/js/mixin/common';
 import storage from '@assets/js/config/storage';
 import constant from '@assets/js/common/constant';
-import {deleteCacheInfo, getRedis, saveCacheInfo, selectCacheInfo, selectCacheInfoDetails} from '@assets/js/api/cache';
+import {deleteCacheInfo, getRedis, insertCacheInfo, saveCacheInfo, selectCacheInfo, selectCacheInfoDetails} from '@assets/js/api/cache';
 
 export default {
     name: 'cache',
     mixins: [common, copy],
     data() {
+        const checkExpire = (rule, value, callback) => {
+            if (!value) {
+                return callback(new Error('请输入过期时间'));
+            }
+            this.addForm.expire = Math.max(value, -1);
+            return callback();
+        };
+        const checkBlank = (rule, value, callback) => {
+            if (!value || !value.trim()) {
+                return callback(new Error('键名不能为空'));
+            }
+            return callback();
+        };
+        const checkValue = (rule, value, callback) => {
+            if (this.addForm.type === 'STRING') {
+                if (!value || !value.trim()) {
+                    return callback(new Error('键值不能为空'));
+                }
+            } else if (this.addForm.type === 'SET') {
+                this.checkInput('set-value', 'member');
+            } else if (this.addForm.type === 'LIST') {
+                this.checkInput('list-value', 'value');
+            } else if (this.addForm.type === 'HASH') {
+                this.checkInput('field-value', 'field');
+                this.checkInput('value-value', 'value');
+            }
+            return callback();
+        };
         return {
             key: '',
             field: '',
@@ -155,6 +284,32 @@ export default {
             cacheInfoTree: [],
             treeIndexMap: {},
             formatTree: false,
+            createKeyDialog: false,
+            addForm: {
+                type: 'STRING',
+                expire: -1,
+                key: '',
+                value: '',
+                set: [''],
+                list: [''],
+                hash: [{field: '', value: ''}],
+            },
+            typeAry: ['STRING', 'HASH', 'LIST', 'SET', 'ZSET'],
+            isValid: true,
+            rules: {
+                type: [
+                    {required: true, message: '请选择数据类型', trigger: 'change'},
+                ],
+                expire: [
+                    {validator: checkExpire, trigger: 'change'},
+                ],
+                key: [
+                    {validator: checkBlank, trigger: 'change'},
+                ],
+                value: [
+                    {validator: checkValue, trigger: 'change'},
+                ],
+            },
         };
     },
     created() {
@@ -455,10 +610,100 @@ export default {
                 }
             });
         },
+        /* 打开新增Key弹窗*/
+        openCreateKeyDialog() {
+            this.createKeyDialog = !this.createKeyDialog;
+            if (this.createKeyDialog) {
+                this.$nextTick(() => {
+                    this.$refs.addFormValue.$el.firstChild.style.setProperty('max-height', '320px');
+                });
+            }
+        },
+        /* 新增key*/
+        operateRow(index, type) {
+            if (this.addForm[type].length - 1 === index) {
+                this.addForm[type].push(type === 'hash' ? {field: '', value: ''} : '');
+            } else {
+                this.addForm[type].splice(index, 1);
+            }
+        },
+        /* 获取新增删除图标*/
+        getIcon(index, type) {
+            return this.addForm[type].length - 1 === index ? 'iconfont icon-xinzeng1' : 'iconfont icon-shanchu2';
+        },
+        /* 保存新key*/
+        insertCacheInfo() {
+            let self = this;
+            self.$refs.form.validate((valid) => {
+                if (valid && self.isValid) {
+                    const hash = {};
+                    for (let item of self.addForm.hash) {
+                        hash[item.field] = item.value;
+                    }
+                    const data = global.deepClone(self.addForm);
+                    data.hash = hash;
+                    insertCacheInfo(data).then((response) => {
+                        self.message(response.flag ? 'success' : 'error', response.msg);
+                    });
+                }
+            });
+        },
+        /* 重置*/
+        resetForm() {
+            this.addForm.key = '';
+            this.addForm.value = '';
+            this.addForm.set = [''];
+            this.addForm.list = [''];
+            this.addForm.hash = [{field: '', value: ''}];
+        },
+        /* 校验输入框*/
+        checkInput(className, msg) {
+            let isValid = true;
+            for (let obj of document.getElementsByClassName(className)) {
+                const value = obj.firstElementChild.value;
+                const hasError = obj.firstElementChild.className.split(' ').includes('form-item-tr-error');
+                if (!value || !value.trim()) {
+                    isValid = false;
+                    if (!hasError) {
+                        $(obj.firstElementChild).addClass('form-item-tr-error');
+                        const div = document.createElement('div');
+                        div.setAttribute('class', 'form-item-tr-error-msg');
+                        div.innerHTML = `【${msg}】不能为空`;
+                        obj.parentElement.appendChild(div);
+                    }
+                } else {
+                    if (hasError) {
+                        const div = obj.parentNode.lastChild;
+                        obj.parentElement.removeChild(div);
+                        $(obj.firstElementChild).removeClass('form-item-tr-error');
+                    }
+                }
+            }
+            this.isValid = isValid;
+        },
     },
     watch: {
         tableMaxHeight(value) {
             this.setTextareaMaxHeight(value);
+        },
+        'addForm.type'(value) {
+            if (!this.createKeyDialog) {
+                return;
+            }
+            this.isValid = true;
+            this.$refs.form.clearValidate();
+            if (value === 'STRING') {
+                this.$nextTick(() => {
+                    this.$refs.addFormValue.$el.firstChild.style.setProperty('max-height', '320px');
+                });
+            } else {
+                for (let obj of document.getElementsByClassName('cache-value')) {
+                    if (obj.firstElementChild.className.split(' ').includes('form-item-tr-error')) {
+                        obj.parentElement.removeChild(obj.parentNode.lastChild);
+                        $(obj.firstElementChild).removeClass('form-item-tr-error');
+                    }
+                }
+            }
         },
     },
 };
@@ -475,6 +720,21 @@ export default {
             padding: 3px;
             margin-top: 10px;
             min-height: 40px !important;
+        }
+
+        .addFormValue .el-textarea__inner {
+            min-height: 40px !important;
+        }
+
+        .form-item-tr-error {
+            border-color: #F56C6C;
+        }
+
+        .form-item-tr-error-msg {
+            color: #F56C6C;
+            font-size: 12px;
+            line-height: 1;
+            padding-top: 4px;
         }
     }
 </style>
@@ -493,6 +753,18 @@ export default {
         .underline {
             border-bottom: 1px solid #EBEEF5;
         }
+
+        .form-item-th {
+            color: #909399;
+            font-weight: bold;
+        }
+
+        .form-item-tt {
+            padding-top: 10px;
+        }
+
+        .form-item-tr {
+            padding-top: 23px;
+        }
     }
 </style>
-

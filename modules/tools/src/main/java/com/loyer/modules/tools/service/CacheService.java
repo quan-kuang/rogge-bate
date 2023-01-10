@@ -3,6 +3,7 @@ package com.loyer.modules.tools.service;
 import com.loyer.common.dedicine.entity.ApiResult;
 import com.loyer.modules.tools.entity.CacheInfo;
 import com.loyer.modules.tools.entity.CacheInfoDetails;
+import com.loyer.modules.tools.entity.InsertCacheInfo;
 
 /**
  * TODO
@@ -19,4 +20,6 @@ public interface CacheService {
     ApiResult deleteCacheInfo(CacheInfoDetails cacheInfoDetails);
 
     ApiResult saveCacheInfo(CacheInfoDetails cacheInfoDetails);
+
+    ApiResult insertCacheInfo(InsertCacheInfo insertCacheInfo);
 }

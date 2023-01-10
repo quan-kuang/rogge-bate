@@ -4,6 +4,7 @@ import com.loyer.common.core.annotation.OperateLogAnnotation;
 import com.loyer.common.dedicine.entity.ApiResult;
 import com.loyer.modules.tools.entity.CacheInfo;
 import com.loyer.modules.tools.entity.CacheInfoDetails;
+import com.loyer.modules.tools.entity.InsertCacheInfo;
 import com.loyer.modules.tools.entity.JedisEntity;
 import com.loyer.modules.tools.service.CacheService;
 import com.loyer.modules.tools.utils.JedisUtil;
@@ -101,5 +102,13 @@ public class CacheController {
     @PostMapping("saveCacheInfo")
     public ApiResult saveCacheInfo(@RequestBody CacheInfoDetails cacheInfoDetails) {
         return cacheService.saveCacheInfo(cacheInfoDetails);
+    }
+
+    @OperateLogAnnotation
+    @PreAuthorize("@pu.hasAllPermissions('cache:save')")
+    @ApiOperation("新增缓存信息")
+    @PostMapping("insertCacheInfo")
+    public ApiResult insertCacheInfo(@Validated @RequestBody InsertCacheInfo insertCacheInfo) {
+        return cacheService.insertCacheInfo(insertCacheInfo);
     }
 }

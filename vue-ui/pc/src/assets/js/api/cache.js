@@ -72,3 +72,12 @@ export function saveCacheInfo(data) {
         data: data,
     });
 }
+
+/* 新增缓存信息*/
+export function insertCacheInfo(data) {
+    return request({
+        url: 'tools/cache/insertCacheInfo',
+        method: 'post',
+        data: data,
+    });
+}

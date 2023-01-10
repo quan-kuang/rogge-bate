@@ -23,6 +23,8 @@ public class CacheUtil {
 
     public static ListCommand LIST;
 
+    public static ZSetCommand ZSET;
+
     public static HashCommand HASH;
 
     public static StringCommand STRING;
@@ -33,6 +35,7 @@ public class CacheUtil {
         KEY = new KeyCommand(redisTemplate);
         SET = new SetCommand(redisTemplate.opsForSet());
         LIST = new ListCommand(redisTemplate.opsForList());
+        ZSET = new ZSetCommand(redisTemplate.opsForZSet());
         HASH = new HashCommand(redisTemplate.opsForHash());
         STRING = new StringCommand(redisTemplate.opsForValue());
     }

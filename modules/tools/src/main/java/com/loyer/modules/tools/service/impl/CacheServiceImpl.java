@@ -7,6 +7,7 @@ import com.loyer.common.dedicine.enums.HintEnum;
 import com.loyer.common.redis.utils.CacheUtil;
 import com.loyer.modules.tools.entity.CacheInfo;
 import com.loyer.modules.tools.entity.CacheInfoDetails;
+import com.loyer.modules.tools.entity.InsertCacheInfo;
 import com.loyer.modules.tools.service.CacheService;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -222,6 +223,35 @@ public class CacheServiceImpl implements CacheService {
         Long expire = cacheInfoDetails.getExpire();
         if (!DateUtil.getStr(cacheInfoDetails.getExpire()).equals(cacheInfoDetails.getExpireHum())) {
             CacheUtil.KEY.expire(key, expire.intValue());
+        }
+        return ApiResult.success();
+    }
+
+    /**
+     * 新增缓存key
+     *
+     * @author kuangq
+     * @date 2023-01-10 16:28
+     */
+    @Override
+    public ApiResult insertCacheInfo(InsertCacheInfo insertCacheInfo) {
+        String key = insertCacheInfo.getKey();
+        if (CacheUtil.KEY.has(key)) {
+            return ApiResult.failure("该key已经存在", key);
+        }
+        DataType dataType = DataType.valueOf(insertCacheInfo.getType());
+        if (dataType == DataType.STRING) {
+            CacheUtil.STRING.set(key, insertCacheInfo.getValue());
+        } else if (dataType == DataType.HASH) {
+            CacheUtil.HASH.putAll(key, insertCacheInfo.getHash());
+        } else if (dataType == DataType.SET) {
+            CacheUtil.SET.add(key, insertCacheInfo.getSet().toArray());
+        } else if (dataType == DataType.LIST) {
+            CacheUtil.LIST.rPush(key, insertCacheInfo.getList().toArray());
+        }
+        int expire = insertCacheInfo.getExpire();
+        if (expire > -1) {
+            CacheUtil.KEY.expire(key, expire);
         }
         return ApiResult.success();
     }
