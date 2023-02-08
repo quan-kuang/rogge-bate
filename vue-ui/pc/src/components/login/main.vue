@@ -28,7 +28,7 @@
                 <slider-verify ref="sliderVerify" @success="onSuccess" @fail="onFail" @again="onAgain"/>
             </el-dialog>
         </div>
-        <div class="icp">
+        <div class="icp" v-show="false">
             <el-link type="info" href="http://beian.miit.gov.cn/" target="_blank">陕ICP备20009750号{{ constant.domainName.includes('www.') ? '-1' : '' }}</el-link>
         </div>
     </div>

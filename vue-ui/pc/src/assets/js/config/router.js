@@ -76,7 +76,7 @@ const back = [
 
 function createRouter() {
     return new Router({
-        base: '/', // tomcat发布设置/app/、nginx设置/
+        base: '/pc', // tomcat发布设置/app/、nginx设置/
         mode: 'history',
         routes: routers,
         menus: menus,
