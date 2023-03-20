@@ -34,4 +34,7 @@ public interface PrefixConst {
 
     //缓存腾讯云接口BizToken的前缀
     String TENCENT_BIZ_TOKEN = "tencent:bizToken:";
+
+    //微信消息缓存前缀
+    String WE_CHAT_MESSAGE = "weChat:message:";
 }

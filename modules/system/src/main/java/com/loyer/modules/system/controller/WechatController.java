@@ -8,7 +8,6 @@ import com.loyer.common.dedicine.entity.WeChatAlarm;
 import com.loyer.modules.system.entity.TemplateMessage;
 import com.loyer.modules.system.entity.TencentEntity;
 import com.loyer.modules.system.utils.WeChatUtil;
-import com.loyer.modules.system.utils.XmlUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.SneakyThrows;
@@ -89,12 +88,11 @@ public class WechatController {
     @OperateLogAnnotation
     @ApiOperation("微信事件监听")
     @PostMapping("link")
-    public ApiResult postLink(HttpServletRequest httpServletRequest) {
+    public String postLink(HttpServletRequest httpServletRequest) {
         //接收微信请求中的入参信息
         String xmlStr = ParamsUtil.getInArgs(httpServletRequest);
         logger.info("【微信事件监听】{}", xmlStr);
-        //将XML信息转换成MAP
-        return ApiResult.success(XmlUtil.xmlToMap(xmlStr));
+        return WeChatUtil.postLink(xmlStr);
     }
 
     @OperateLogAnnotation

@@ -85,7 +85,7 @@ public class GatewayGlobalFilter implements GlobalFilter, Ordered {
         ServerHttpRequest serverHttpRequest = exchange.getRequest();
         String path = serverHttpRequest.getPath().toString();
         //校验放行接口
-        if (privateReleasePorts.stream().anyMatch(path::contains) || publicReleasePorts.stream().anyMatch(getPath(path)::contains)) {
+        if (privateReleasePorts.stream().anyMatch(item -> item.contains(path)) || publicReleasePorts.stream().anyMatch(getPath(path)::contains)) {
             return chain.filter(exchange);
         }
         logger.info("【网关拦截器】{}", path);

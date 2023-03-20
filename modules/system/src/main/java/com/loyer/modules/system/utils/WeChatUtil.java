@@ -3,6 +3,8 @@ package com.loyer.modules.system.utils;
 import com.alibaba.fastjson.JSON;
 import com.loyer.common.apis.server.ToolsServer;
 import com.loyer.common.core.constant.SuffixConst;
+import com.loyer.common.core.enums.DatePattern;
+import com.loyer.common.core.utils.common.DateUtil;
 import com.loyer.common.core.utils.common.ParamsUtil;
 import com.loyer.common.core.utils.document.FileUtil;
 import com.loyer.common.core.utils.encrypt.AesUtil;
@@ -20,6 +22,7 @@ import com.loyer.modules.system.constant.PrefixConst;
 import com.loyer.modules.system.entity.TemplateMessage;
 import com.loyer.modules.system.entity.TencentEntity;
 import com.loyer.modules.system.entity.WeChatConfig;
+import com.loyer.modules.system.entity.WeChatMessage;
 import com.loyer.modules.system.inherit.WechatHttpMessageConverter;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -346,5 +349,18 @@ public class WeChatUtil {
             dataMap.put(data.getKey(), new TencentEntity.TemplateMessageRequest.Data(data.getValue(), data.getColor()));
         }
         return dataMap;
+    }
+
+    /**
+     * 微信消息记录
+     *
+     * @author kuangq
+     * @date 2023-03-20 12:12
+     */
+    public static String postLink(String xmlStr) {
+        WeChatMessage weChatMessage = XmlUtil.toJavaObject(xmlStr, WeChatMessage.class);
+        String key = String.format("%s%s%s", PrefixConst.WE_CHAT_MESSAGE, weChatMessage.getFromUserName(), DateUtil.getTimestamp(DatePattern.YMD_1));
+        CacheUtil.LIST.rPush(key, JSON.toJSONString(weChatMessage));
+        return "success";
     }
 }
