@@ -1,5 +1,6 @@
 package com.loyer.modules.system.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,13 +13,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "xml")
 @XmlAccessorType(XmlAccessType.FIELD)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class WeChatMessage {
 
     @XmlElement(name = "ToUserName")
-    private String toUserName;
+    private String receiver;
 
     @XmlElement(name = "FromUserName")
-    private String fromUserName;
+    private String sender;
 
     @XmlElement(name = "CreateTime")
     private Long createTime;
@@ -31,4 +33,10 @@ public class WeChatMessage {
 
     @XmlElement(name = "MsgId")
     private Long msgId;
+
+    @XmlElement(name = "Event")
+    private String event;
+
+    @XmlElement(name = "EventKey")
+    private String eventKey;
 }

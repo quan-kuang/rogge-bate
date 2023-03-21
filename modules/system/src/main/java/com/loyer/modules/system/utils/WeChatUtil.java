@@ -2,6 +2,7 @@ package com.loyer.modules.system.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.loyer.common.apis.server.ToolsServer;
+import com.loyer.common.core.constant.SpecialCharsConst;
 import com.loyer.common.core.constant.SuffixConst;
 import com.loyer.common.core.enums.DatePattern;
 import com.loyer.common.core.utils.common.DateUtil;
@@ -310,6 +311,25 @@ public class WeChatUtil {
     }
 
     /**
+     * 获取公众号关注人的openId
+     *
+     * @author kuangq
+     * @date 2023-03-21 11:55
+     */
+    public static List<String> getFollowUserIdList() {
+        String getFollowUsersUrl = String.format(WE_CHAT_CONFIG.getGetFollowUsersUrl(), getAccessToken(), SpecialCharsConst.BLANK);
+        TencentEntity.FollowUser followUser = HttpUtil.doGet(getFollowUsersUrl, TencentEntity.FollowUser.class);
+        System.out.println(JSON.toJSONString(followUser));
+        if (followUser.getErrcode() != null) {
+            throw new BusinessException(followUser.getErrmsg());
+        }
+        if (followUser.getTotal() == 0) {
+            throw new BusinessException(HintEnum.HINT_1078);
+        }
+        return followUser.getData().getOpenIdList();
+    }
+
+    /**
      * 发送微信模板消息
      *
      * @author kuangq
@@ -359,8 +379,24 @@ public class WeChatUtil {
      */
     public static String postLink(String xmlStr) {
         WeChatMessage weChatMessage = XmlUtil.toJavaObject(xmlStr, WeChatMessage.class);
-        String key = String.format("%s%s%s", PrefixConst.WE_CHAT_MESSAGE, weChatMessage.getFromUserName(), DateUtil.getTimestamp(DatePattern.YMD_1));
-        CacheUtil.LIST.rPush(key, JSON.toJSONString(weChatMessage));
-        return "success";
+        String key = String.format("%s%s:%s", PrefixConst.WE_CHAT_MESSAGE, DateUtil.getTimestamp(DatePattern.YMD_1), weChatMessage.getSender());
+        CacheUtil.LIST.rPush(key, weChatMessage);
+        return getXmlResult(weChatMessage);
+    }
+
+    /**
+     * 获取返回xml参数
+     *
+     * @author kuangq
+     * @date 2023-03-20 19:11
+     */
+    private static String getXmlResult(WeChatMessage weChatMessage) {
+        return "<xml>"
+                + String.format("<ToUserName><![CDATA[%s]]></ToUserName>", weChatMessage.getSender())
+                + String.format("<FromUserName><![CDATA[%s]]></FromUserName>", weChatMessage.getReceiver())
+                + String.format("<CreateTime>%s</CreateTime>", System.currentTimeMillis() / 1000)
+                + String.format("<MsgType><![CDATA[%s]]></MsgType>", "text")
+                + String.format("<Content><![CDATA[%s]]></Content>", DateUtil.getTimestamp(weChatMessage.getCreateTime() * 1000, DatePattern.YMD_HMS_1))
+                + "</xml>";
     }
 }

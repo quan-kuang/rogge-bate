@@ -2,12 +2,20 @@ package com.loyer.common.core.utils.common;
 
 import com.loyer.common.core.enums.DatePattern;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 日期工具类
@@ -142,5 +150,46 @@ public class DateUtil {
             return sec + " sec";
         }
         return "-";
+    }
+
+    /**
+     * 获取指定日期所在本周时间戳
+     *
+     * @author kuangq
+     * @date 2023-03-21 10:16
+     */
+    public static List<Long> getWeekDate(String dateStr) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DatePattern.YMD_1.getPattern());
+        LocalDate currentDate = LocalDate.parse(dateStr, dateTimeFormatter);
+        int daysUntilMonday = currentDate.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue();
+        if (daysUntilMonday < 0) {
+            daysUntilMonday += 7;
+        }
+        LocalDate mondayDate = currentDate.minusDays(daysUntilMonday);
+        List<Long> weekDateList = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            LocalDate localDate = mondayDate.plusDays(i);
+            Instant instant = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+            weekDateList.add(instant.toEpochMilli());
+        }
+        return weekDateList;
+    }
+
+    /**
+     * 获取最近几天的日期
+     *
+     * @author kuangq
+     * @date 2023-03-21 13:00
+     */
+    public static List<String> getRecentDate(String dateStr, int num) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DatePattern.YMD_1.getPattern());
+        LocalDate currentDate = StringUtils.isBlank(dateStr) ? LocalDate.now() : LocalDate.parse(dateStr, dateTimeFormatter);
+        List<String> recentDateList = new ArrayList<>();
+        for (int i = num - 1; i > 0; i--) {
+            LocalDate localDate = currentDate.minusDays(i);
+            recentDateList.add(localDate.format(dateTimeFormatter));
+        }
+        recentDateList.add(currentDate.format(dateTimeFormatter));
+        return recentDateList;
     }
 }

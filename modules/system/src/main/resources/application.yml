@@ -258,6 +258,8 @@ we-chat-config:
   getAccessTokenUrl: https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code
   #微信网页授权拉取用户信息
   getUserInfoUrl: https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN
+  #获取微信公众号关注用户列表
+  getFollowUsersUrl: https://api.weixin.qq.com/cgi-bin/user/get?access_token=%s&next_openid=%s
   #微信发送模板消息
   sendTemplateMessageUrl: https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s
 #健康检测

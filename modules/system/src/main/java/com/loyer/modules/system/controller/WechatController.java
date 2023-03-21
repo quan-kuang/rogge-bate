@@ -13,12 +13,16 @@ import io.swagger.annotations.ApiOperation;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -88,11 +92,16 @@ public class WechatController {
     @OperateLogAnnotation
     @ApiOperation("微信事件监听")
     @PostMapping("link")
-    public String postLink(HttpServletRequest httpServletRequest) {
+    public void postLink(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
         //接收微信请求中的入参信息
         String xmlStr = ParamsUtil.getInArgs(httpServletRequest);
         logger.info("【微信事件监听】{}", xmlStr);
-        return WeChatUtil.postLink(xmlStr);
+        String xmlResult = WeChatUtil.postLink(xmlStr);
+        httpServletResponse.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        httpServletResponse.setContentType(MediaType.TEXT_XML_VALUE);
+        PrintWriter printWriter = httpServletResponse.getWriter();
+        printWriter.write(xmlResult);
+        printWriter.close();
     }
 
     @OperateLogAnnotation

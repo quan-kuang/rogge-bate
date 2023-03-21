@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -213,6 +214,29 @@ public class TencentEntity {
             private String value;
 
             private String color;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @EqualsAndHashCode(callSuper = true)
+    public static class FollowUser extends ErrorMsg {
+
+        private Integer total;
+
+        private Integer count;
+
+        private Data data;
+
+        @JSONField(name = "next_openid")
+        private String nextOpenid;
+
+        @lombok.Data
+        @AllArgsConstructor
+        public static class Data {
+
+            @JSONField(name = "openid")
+            private List<String> openIdList;
         }
     }
 }

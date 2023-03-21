@@ -46,4 +46,7 @@ public class WeChatConfig {
 
     @ApiModelProperty("微信发送模板消息的接口地址")
     private String sendTemplateMessageUrl;
+
+    @ApiModelProperty("获取微信公众号关注用户列表")
+    private String getFollowUsersUrl;
 }
