@@ -239,4 +239,20 @@ public class TencentEntity {
             private List<String> openIdList;
         }
     }
+
+    @Data
+    @NoArgsConstructor
+    @EqualsAndHashCode(callSuper = true)
+    public static class Upload extends ErrorMsg {
+
+        private String type;
+
+        @JSONField(name = "media_id")
+        private String mediaId;
+
+        @JSONField(name = "created_at")
+        private Long createdAt;
+
+        private Object[] item;
+    }
 }

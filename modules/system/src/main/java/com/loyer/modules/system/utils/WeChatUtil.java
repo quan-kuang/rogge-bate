@@ -20,16 +20,11 @@ import com.loyer.common.dedicine.utils.GeneralUtil;
 import com.loyer.common.dedicine.utils.StringUtil;
 import com.loyer.common.redis.utils.CacheUtil;
 import com.loyer.modules.system.constant.PrefixConst;
-import com.loyer.modules.system.entity.TemplateMessage;
-import com.loyer.modules.system.entity.TencentEntity;
-import com.loyer.modules.system.entity.WeChatConfig;
-import com.loyer.modules.system.entity.WeChatMessage;
-import com.loyer.modules.system.inherit.WechatHttpMessageConverter;
+import com.loyer.modules.system.entity.*;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -262,12 +257,9 @@ public class WeChatUtil {
      */
     @SneakyThrows
     public static String getAuthUserInfo(String code, String state) {
-        //处理以下两个微信接口返回参数类型为text/plain的问题，添加HttpMessageConverter转换支持
-        RestTemplate restTemplate = HttpUtil.restTemplate;
-        restTemplate.getMessageConverters().add(new WechatHttpMessageConverter());
         //获取AccessToken
         String getAccessTokenUrl = String.format(WE_CHAT_CONFIG.getGetAccessTokenUrl(), WE_CHAT_CONFIG.getAppId(), WE_CHAT_CONFIG.getAppSecret(), code);
-        TencentEntity.AuthAccessToken authAccessToken = restTemplate.getForObject(getAccessTokenUrl, TencentEntity.AuthAccessToken.class);
+        TencentEntity.AuthAccessToken authAccessToken = HttpUtil.restTemplate.getForObject(getAccessTokenUrl, TencentEntity.AuthAccessToken.class);
         //失败校验
         if (authAccessToken == null || authAccessToken.getErrcode() != null) {
             throw new BusinessException(HintEnum.HINT_1012, authAccessToken);
@@ -317,16 +309,22 @@ public class WeChatUtil {
      * @date 2023-03-21 11:55
      */
     public static List<String> getFollowUserIdList() {
+        Set<String> openIdSet = CacheUtil.SET.members(PrefixConst.WECHAT_WATCH_USERS);
+        if (openIdSet != null && !openIdSet.isEmpty()) {
+            return new ArrayList<>(openIdSet);
+        }
         String getFollowUsersUrl = String.format(WE_CHAT_CONFIG.getGetFollowUsersUrl(), getAccessToken(), SpecialCharsConst.BLANK);
         TencentEntity.FollowUser followUser = HttpUtil.doGet(getFollowUsersUrl, TencentEntity.FollowUser.class);
-        System.out.println(JSON.toJSONString(followUser));
+        logger.info("【getFollowUserIdList】{}", JSON.toJSONString(followUser));
         if (followUser.getErrcode() != null) {
             throw new BusinessException(followUser.getErrmsg());
         }
         if (followUser.getTotal() == 0) {
             throw new BusinessException(HintEnum.HINT_1078);
         }
-        return followUser.getData().getOpenIdList();
+        List<String> openIdList = followUser.getData().getOpenIdList();
+        CacheUtil.SET.add(PrefixConst.WECHAT_WATCH_USERS, openIdList.toArray());
+        return openIdList;
     }
 
     /**
@@ -349,8 +347,8 @@ public class WeChatUtil {
         for (String userId : userIdList) {
             templateMessageRequest.setToUser(userId);
             TencentEntity.ErrorMsg errorMsg = HttpUtil.doPostJson(sendTemplateMessageUrl, templateMessageRequest, TencentEntity.ErrorMsg.class);
+            logger.info("【sendTemplateMessage】{}", JSON.toJSONString(errorMsg));
             if (errorMsg.getErrcode() != 0) {
-                logger.error(JSON.toJSONString(errorMsg));
                 return ApiResult.failure(errorMsg.getErrmsg());
             }
         }
@@ -379,9 +377,25 @@ public class WeChatUtil {
      */
     public static String postLink(String xmlStr) {
         WeChatMessage weChatMessage = XmlUtil.toJavaObject(xmlStr, WeChatMessage.class);
-        String key = String.format("%s%s:%s", PrefixConst.WE_CHAT_MESSAGE, DateUtil.getTimestamp(DatePattern.YMD_1), weChatMessage.getSender());
+        String key = String.format("%s%s:%s", PrefixConst.WE_CHAT_MESSAGE, DateUtil.getTimestamp(weChatMessage.getCreateTime() * 1000, DatePattern.YMD_1), weChatMessage.getSender());
         CacheUtil.LIST.rPush(key, weChatMessage);
         return getXmlResult(weChatMessage);
+    }
+
+    /**
+     * 上传媒体文件
+     *
+     * @author kuangq
+     * @date 2023-03-22 14:55
+     */
+    public static String upload(MediaInfo mediaInfo) {
+        String url = String.format(WE_CHAT_CONFIG.getUploadMediaUrl(), getAccessToken(), mediaInfo.getType());
+        TencentEntity.Upload upload = HttpUtil.upload(url, mediaInfo.getName(), mediaInfo.getBase64(), TencentEntity.Upload.class);
+        logger.info("【upload】{}", JSON.toJSONString(upload));
+        if (upload.getErrcode() != null) {
+            throw new BusinessException(upload.getErrmsg());
+        }
+        return upload.getMediaId();
     }
 
     /**
@@ -398,5 +412,30 @@ public class WeChatUtil {
                 + String.format("<MsgType><![CDATA[%s]]></MsgType>", "text")
                 + String.format("<Content><![CDATA[%s]]></Content>", DateUtil.getTimestamp(weChatMessage.getCreateTime() * 1000, DatePattern.YMD_HMS_1))
                 + "</xml>";
+    }
+
+    /**
+     * 发送图文消息
+     *
+     * @author kuangq
+     * @date 2023-03-22 16:45
+     */
+    public static ApiResult sendMassMessage(String title, String type, List<String> mediaIdList, List<String> openIdList) {
+        MassMessage.ImageInfo imageInfo = new MassMessage.ImageInfo();
+        imageInfo.setMediaIdList(mediaIdList);
+        imageInfo.setRecommend(title);
+        imageInfo.setNeedOpenComment(true);
+        imageInfo.setOnlyFansCanComment(false);
+        MassMessage massMessage = new MassMessage();
+        massMessage.setMsgType(type);
+        massMessage.setReceiver(openIdList);
+        massMessage.setImageInfo(imageInfo);
+        String url = String.format(WE_CHAT_CONFIG.getSendMassMessageUrl(), getAccessToken());
+        TencentEntity.ErrorMsg errorMsg = HttpUtil.doPostJson(url, massMessage, TencentEntity.ErrorMsg.class);
+        logger.info("【sendMassMessage】{}", JSON.toJSONString(errorMsg));
+        if (errorMsg.getErrcode() == 0) {
+            return ApiResult.success(errorMsg.getErrmsg());
+        }
+        return ApiResult.failure(errorMsg.getErrmsg());
     }
 }

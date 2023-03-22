@@ -1,5 +1,6 @@
 package com.loyer.common.core.inherit;
 
+import lombok.SneakyThrows;
 import org.springframework.core.io.InputStreamResource;
 
 import java.io.InputStream;
@@ -13,22 +14,15 @@ import java.io.InputStream;
 @SuppressWarnings({"unused"})
 public class CommonInputStreamResource extends InputStreamResource {
 
-    private String fileName;
+    private final String fileName;
 
-    private int length;
+    private final long length;
 
-    public CommonInputStreamResource(InputStream inputStream) {
-        super(inputStream);
-    }
-
+    @SneakyThrows
     public CommonInputStreamResource(InputStream inputStream, String fileName) {
         super(inputStream);
         this.fileName = fileName;
-    }
-
-    public CommonInputStreamResource(InputStream inputStream, int length) {
-        super(inputStream);
-        this.length = length;
+        this.length = inputStream.available();
     }
 
     @Override

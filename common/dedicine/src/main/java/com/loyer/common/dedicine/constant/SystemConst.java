@@ -53,8 +53,17 @@ public interface SystemConst {
     String VUE_PROJECT_PATH = "/home/admin/project/vue/";
 
     //用户信息缓存时长
-    Integer USER_EXPIRE_TIME = 3600;
+    Integer USER_EXPIRE_TIME = 3600 * 24;
 
     //拼图验证码允许偏差
     Integer ALLOW_DEVIATION = 3;
+
+    //公众号的ID
+    String WECHAT_ID = "gh_dba47d12d20a";
+
+    //我的微信openid
+    String MY_OPEN_ID = "or7WYt-vdrGynNLxFidKr2-Mmggc";
+
+    //小宝的微信openid
+    String BAO_OPEN_ID = "or7WYt5P62MmL3Un3ecWgENFqFTQ";
 }

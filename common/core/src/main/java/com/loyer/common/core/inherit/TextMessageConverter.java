@@ -1,4 +1,4 @@
-package com.loyer.modules.system.inherit;
+package com.loyer.common.core.inherit;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -12,9 +12,9 @@ import java.util.List;
  * @author kuangq
  * @date 2020-11-09 23:15
  */
-public class WechatHttpMessageConverter extends MappingJackson2HttpMessageConverter {
+public class TextMessageConverter extends MappingJackson2HttpMessageConverter {
 
-    public WechatHttpMessageConverter() {
+    public TextMessageConverter() {
         List<MediaType> mediaTypes = new ArrayList<>();
         mediaTypes.add(MediaType.TEXT_PLAIN);
         mediaTypes.add(MediaType.TEXT_HTML);

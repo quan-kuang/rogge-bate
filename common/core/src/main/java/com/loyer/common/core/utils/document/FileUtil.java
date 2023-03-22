@@ -90,8 +90,8 @@ public class FileUtil {
      * @date 2021-03-06 13:50
      */
     public static InputStream toInputStream(String base64) {
-        //转化为输入流
-        return IOUtils.toInputStream(base64, StandardCharsets.UTF_8);
+        byte[] bytes = Base64Util.decode(base64);
+        return new ByteArrayInputStream(bytes);
     }
 
     /**

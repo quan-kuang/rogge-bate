@@ -66,7 +66,7 @@ public class DateUtil {
     @SneakyThrows
     public static long getTimestamp(String dateStr, DatePattern datePattern) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern.getPattern());
-        Date date = simpleDateFormat.parse(dateStr);
+        Date date = StringUtils.isBlank(dateStr) ? new Date() : simpleDateFormat.parse(dateStr);
         return date.getTime();
     }
 

@@ -1,33 +1,42 @@
 <template>
-    <div class="home">
+    <div class="ecg">
+        <!-- 面板标签-->
+        <panel-title>
+            <el-button type="info" icon="el-icon-s-promotion" @click="sendImageMsg" v-has-any-permissions="['qianYu:upload','qianYu:send']">发送报告</el-button>
+        </panel-title>
         <div class="title">
             <i class="el-icon-caret-left" @click="onLeft"/>
             <span>&emsp;{{ result.dateList[0] }}&emsp;<i class="el-icon-refresh" @click="selectEcgInfo"/>&emsp;{{ result.dateList[2] }}&emsp;</span>
             <i class="el-icon-caret-right" @click="onRigth"/>
         </div>
-        <el-row>
-            <el-col :span="24">
-                <div class="chart" ref="chart_1"/>
-            </el-col>
-            <el-col :span="24">
-                <div class="chart" ref="chart_2"/>
-            </el-col>
-        </el-row>
+        <div class="content">
+            <el-row>
+                <el-col :span="11">
+                    <div class="chart" ref="chart_1"/>
+                </el-col>
+                <el-col :span="11" :push="1">
+                    <div class="chart" ref="chart_2"/>
+                </el-col>
+            </el-row>
+        </div>
     </div>
 </template>
 
 <script>
+import format from '@assets/js/util/format';
 import popup from '@assets/js/mixin/popup';
-import {selectEcgInfo} from '@assets/js/api/qianYu';
+import common from '@assets/js/mixin/common';
+import {selectEcgInfo, sendImageMsg} from '@assets/js/api/qianYu';
 
 const echarts = require('echarts');
 
 export default {
     name: 'home',
-    mixins: [popup],
+    mixins: [popup, common],
     data() {
         return {
-            hours: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
+            format: format,
+            hours: ['07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
             currentDate: new Date(),
             result: {
                 dateList: [],
@@ -57,120 +66,103 @@ export default {
             });
         },
         initCharts() {
-            let self = this;
-            const option_1 = {
-                legend: {
-                    left: 'right',
-                },
-                tooltip: {
-                    position: 'top',
-                    formatter: function (params) {
-                        return (
-                            params.value[2] +
-                                ' commits in ' +
-                                self.hours[params.value[0]] +
-                                ' of ' +
-                                self.result.dateList[params.value[1]]
-                        );
-                    },
-                },
-                grid: {
-                    bottom: 10,
-                    right: 10,
-                    left: 10,
-                    containLabel: true,
-                },
-                xAxis: {
-                    type: 'category',
-                    data: self.hours,
-                    boundaryGap: false,
-                    splitLine: {
-                        show: true,
-                    },
-                    axisLine: {
-                        show: false,
-                    },
-                },
-                yAxis: {
-                    type: 'category',
-                    data: self.result.dateList,
-                    axisLine: {
-                        show: false,
-                    },
-                },
-                series: [
-                    {
-                        name: '浅予',
-                        type: 'scatter',
-                        symbolSize: function (val) {
-                            return val[2] * 2;
-                        },
-                        data: self.result.dataList,
-                        animationDelay: function (idx) {
-                            return idx * 5;
-                        },
-                    },
-                ],
-            };
-            if (self.$refs.chart_1.childNodes.length > 0) {
-                self.chart_1.dispose();
-            }
-            self.chart_1 = echarts.init(self.$refs.chart_1);
-            self.chart_1.setOption(option_1);
-
-
-            const option_2 = {
+            const barchartOption = this.getBarChartOption();
+            this.drawChart('chart_1', barchartOption);
+            const scatterChartOption = this.getScatterChartOption();
+            this.drawChart('chart_2', scatterChartOption);
+        },
+        getBarChartOption() {
+            return {
                 tooltip: {
                     trigger: 'axis',
                     axisPointer: {
                         type: 'cross',
-                        crossStyle: {
-                            color: '#999',
-                        },
+                        crossStyle: {color: '#999'},
                     },
                 },
                 toolbox: {
                     feature: {
-                        dataView: {show: true, readOnly: false},
                         magicType: {show: true, type: ['line', 'bar']},
-                        restore: {show: true},
+                        dataView: {show: true, readOnly: false},
                         saveAsImage: {show: true},
                     },
                 },
                 grid: {
-                    bottom: 10,
-                    right: 10,
                     left: 10,
+                    right: 10,
+                    bottom: 10,
                     containLabel: true,
                 },
                 legend: {
                     left: 10,
-                    data: self.result.dateList,
+                    data: this.result.dateList,
                 },
                 xAxis: [
                     {
+                        data: this.hours,
                         type: 'category',
-                        data: self.hours,
                         axisPointer: {type: 'shadow'},
                     },
                 ],
-                yAxis: [{type: 'value'},
+                yAxis: [
+                    {
+                        type: 'value',
+                    },
                 ],
-                series: self.getSeries(),
+                series: this.getSeries(),
             };
-            if (self.$refs.chart_2.childNodes.length > 0) {
-                self.chart_2.dispose();
+        },
+        getScatterChartOption() {
+            return {
+                tooltip: {
+                    position: 'top',
+                    formatter: (val) => `beat ${val.value[2]} times`,
+                },
+                toolbox: {
+                    feature: {
+                        dataView: {show: true, readOnly: false},
+                        saveAsImage: {show: true},
+                    },
+                },
+                grid: {
+                    left: 10,
+                    right: 10,
+                    bottom: 10,
+                    containLabel: true,
+                },
+                xAxis: {
+                    type: 'category',
+                    data: this.hours,
+                    boundaryGap: false,
+                    splitLine: {show: true},
+                    axisLine: {show: false},
+                },
+                yAxis: {
+                    type: 'category',
+                    data: this.result.dateList,
+                    axisLine: {show: false},
+                },
+                series: [
+                    {
+                        type: 'scatter',
+                        data: this.result.dataList,
+                        symbolSize: (val) => val[2] * 2,
+                        animationDelay: (idx) => idx * 5,
+                        itemStyle: {
+                            normal: {
+                                color: (item) => format.decode(item.value[1], 0, 'rgb(84,112,198)', 1, 'rgb(145,204,117)', 2, 'rgb(250,200,88)', ''),
+                            },
+                        },
+                    },
+                ],
+            };
+        },
+        drawChart(ref, option) {
+            if (this.$refs[ref].childNodes.length > 0) {
+                this[ref].dispose();
             }
-            self.chart_2 = echarts.init(self.$refs.chart_2);
-            self.chart_2.setOption(option_2);
-
-            // const opts = {
-            //     type: 'png',
-            //     pixelRatio: 1,
-            //     excludeComponents: ['toolbox'],
-            // };
-            // let resBase64 = self.chart_2.getDataURL(opts);
-            // console.log(resBase64);
+            this[ref] = echarts.init(this.$refs[ref]);
+            this[ref].setOption(option);
         },
         getSeries() {
             const series = [];
@@ -178,32 +170,54 @@ export default {
                 const item = {
                     type: 'bar',
                     name: this.result.dateList[i],
-                    tooltip: {valueFormatter: (value) => value},
                     data: this.result.dataList.filter((item) => item[1] === i).map((item) => [item[2]][0]),
                 };
                 series.push(item);
             }
             return series;
         },
-        onLeft() {
+        getImageBase64(ref) {
+            const opts = {
+                type: 'png',
+                pixelRatio: 1,
+                excludeComponents: ['toolbox'],
+            };
+            let base64 = this[ref].getDataURL(opts);
+            console.log(base64);
+            return base64.substring(22);
+        },
+        sendImageMsg() {
             let self = this;
-            self.currentDate.setDate(self.currentDate.getDate() - 3);
-            self.selectEcgInfo();
+            const loading = self.loadingOpen('.home');
+            const data = {
+                mediaInfoList: [
+                    {name: 'chart_1.png', type: 'image', base64: self.getImageBase64('chart_1')},
+                    {name: 'chart_2.png', type: 'image', base64: self.getImageBase64('chart_2')},
+                ],
+            };
+            sendImageMsg(data).then((response) => {
+                self.message(response.flag ? 'success' : 'error', response.msg);
+            }).finally(() => {
+                loading && loading.close();
+            });
+        },
+        onLeft() {
+            this.currentDate.setDate(this.currentDate.getDate() - 1);
+            this.selectEcgInfo();
         },
         onRigth() {
-            let self = this;
-            if (new Date(self.result.dateList[2] + ' 23:59:59') >= new Date()) {
+            if (new Date(this.result.dateList[2] + ' 23:59:59') >= new Date()) {
                 return;
             }
-            self.currentDate.setDate(self.currentDate.getDate() + 3);
-            self.selectEcgInfo();
+            this.currentDate.setDate(this.currentDate.getDate() + 1);
+            this.selectEcgInfo();
         },
     },
 };
 </script>
 
 <style scoped lang="scss">
-    .home {
+    .ecg {
         .title {
             text-align: center;
             width: 100%;
@@ -219,8 +233,14 @@ export default {
             }
         }
 
-        .chart {
-            height: 450px;
+        .content {
+            width: 100%;
+            height: 100%;
+            margin-top: 20px;
+
+            .chart {
+                height: 450px;
+            }
         }
     }
 </style>

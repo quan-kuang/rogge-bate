@@ -1,7 +1,11 @@
 package com.loyer.common.core.utils.request;
 
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+import com.loyer.common.core.inherit.CommonInputStreamResource;
+import com.loyer.common.core.inherit.TextMessageConverter;
+import com.loyer.common.core.utils.document.FileUtil;
 import com.loyer.common.core.utils.reflect.EntityUtil;
+import lombok.SneakyThrows;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -24,6 +28,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +75,7 @@ public class HttpUtil {
             RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
             List<HttpMessageConverter<?>> messageConverters = restTemplate.getMessageConverters().stream().filter(item -> !(item instanceof MappingJackson2HttpMessageConverter)).collect(Collectors.toList());
             messageConverters.add(new FastJsonHttpMessageConverter());
+            messageConverters.add(new TextMessageConverter());
             restTemplate.setMessageConverters(messageConverters);
             return restTemplate;
         } catch (Exception e) {
@@ -340,5 +346,23 @@ public class HttpUtil {
      */
     public static <T> T send(String url, HttpMethod httpMethod, MediaType mediaType, Map<String, String> headers, Object uriVariables, ParameterizedTypeReference<T> typeReference) {
         return restTemplate.exchange(url, httpMethod, getHttpEntity(mediaType, headers, uriVariables), typeReference).getBody();
+    }
+
+    /**
+     * 上传文件
+     *
+     * @author kuangq
+     * @date 2023-03-22 14:47
+     */
+    @SneakyThrows
+    public static <T> T upload(String url, String fileName, String base64, Class<T> responseType) {
+        InputStream inputStream = FileUtil.toInputStream(base64);
+        CommonInputStreamResource commonInputStreamResource = new CommonInputStreamResource(inputStream, fileName);
+        MultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+        multiValueMap.add("media", commonInputStreamResource);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(multiValueMap, httpHeaders);
+        return restTemplate.exchange(url, HttpMethod.POST, requestEntity, responseType).getBody();
     }
 }

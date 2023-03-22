@@ -14,9 +14,13 @@ public interface PrefixConst extends com.loyer.common.core.constant.PrefixConst 
     //微信报警接收人
     String WECHAT_ALRAM_USERS = "weChat:alram:users";
 
+    //微信公众号关注列表
+    String WECHAT_WATCH_USERS = "weChat:watch:users";
+
     //发送登录通知邮件的缓存KEY
     String SEND_LOGIN_INFORM_MAIL_KEY = "sendLoginInformMail";
 
     //微信报警模板ID的缓存KEY
     String WECHAT_ALARM_TEMPLATE = "wechatAlarmTemplate";
+
 }

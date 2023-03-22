@@ -8,3 +8,12 @@ export function selectEcgInfo(params) {
         params: params,
     });
 }
+
+/* 发送图片报告*/
+export function sendImageMsg(data) {
+    return request({
+        url: 'system/qianYu/sendImageMsg',
+        method: 'post',
+        data: data,
+    });
+}
