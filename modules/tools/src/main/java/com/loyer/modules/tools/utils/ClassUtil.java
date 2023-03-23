@@ -115,8 +115,9 @@ public class ClassUtil {
             if (path.endsWith("classes/")) {
                 continue;
             }
-            JarFile jarFile = new JarFile(path.substring(path.indexOf(SpecialCharsConst.SLASH)));
-            set.addAll(getClassNameFromJar(jarFile.entries(), packageName, isRecursion));
+            try (JarFile jarFile = new JarFile(path.substring(path.indexOf(SpecialCharsConst.SLASH)))) {
+                set.addAll(getClassNameFromJar(jarFile.entries(), packageName, isRecursion));
+            }
         }
         return set;
     }

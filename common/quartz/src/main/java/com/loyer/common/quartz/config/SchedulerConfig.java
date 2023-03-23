@@ -24,7 +24,7 @@ public class SchedulerConfig {
      * @date 2020-12-16 17:02
      */
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(@Qualifier("mysqlDataSource") DataSource dataSource) {
+    public SchedulerFactoryBean schedulerFactoryBean(@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") @Qualifier("mysqlDataSource") DataSource dataSource) {
         //调度器配置
         Properties properties = new Properties();
         //调度器实例编号自动生成

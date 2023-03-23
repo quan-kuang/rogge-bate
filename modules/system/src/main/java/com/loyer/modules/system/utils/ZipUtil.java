@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Enumeration;
 
 /**
@@ -132,13 +133,13 @@ public class ZipUtil {
                 if (file.isDirectory()) {
                     count = compress(zipOutputStream, file, entryName, zipName, count);
                 } else {
-                    count += compress(zipOutputStream, entryName, new FileInputStream(file));
+                    count += compress(zipOutputStream, entryName, Files.newInputStream(file.toPath()));
                 }
             }
         } else {
             //文件直接压缩
             String entryName = dirName + zipFile.getName();
-            count += compress(zipOutputStream, entryName, new FileInputStream(zipFile));
+            count += compress(zipOutputStream, entryName, Files.newInputStream(zipFile.toPath()));
         }
         return count;
     }
@@ -218,7 +219,7 @@ public class ZipUtil {
                     //获取具体的ZipEntry的输入流
                     InputStream inputStream = zipFile.getInputStream(zipEntry);
                     //创建解压文件输出流
-                    OutputStream outputStream = new FileOutputStream(file);
+                    OutputStream outputStream = Files.newOutputStream(file.toPath());
                     //加入缓冲区优化写入效率
                     byte[] bytes = new byte[2048];
                     //写入文件

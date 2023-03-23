@@ -26,6 +26,8 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +93,7 @@ public class PdfUtil {
             //读取html模板文件、注意字符集编码
             inputStream = new ByteArrayInputStream(StringUtil.decode(html));
             //创建PDF输出流
-            outputStream = new FileOutputStream(filePath);
+            outputStream = Files.newOutputStream(Paths.get(filePath));
             //创建文档对象
             document = new Document(PageSize.A4);
             PdfWriter pdfWriter = PdfWriter.getInstance(document, outputStream);
@@ -138,10 +140,10 @@ public class PdfUtil {
                 throw new BusinessException(HintEnum.HINT_1009, sourcePath);
             }
             //读取需要签章的pdf
-            inputStream = new FileInputStream(file);
+            inputStream = Files.newInputStream(file.toPath());
             pdfReader = new PdfReader(inputStream);
             //pdf追加图片的对象
-            pdfStamper = new PdfStamper(pdfReader, new FileOutputStream(targetPath));
+            pdfStamper = new PdfStamper(pdfReader, Files.newOutputStream(Paths.get(targetPath)));
             //根据指定内容获取需要盖图的坐标
             List<float[]> coords = getCoords(pdfReader, stampGoal);
             for (float[] coord : coords) {

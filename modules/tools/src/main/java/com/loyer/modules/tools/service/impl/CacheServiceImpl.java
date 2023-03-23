@@ -21,19 +21,16 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 /**
- * TODO
+ * 缓存操作
  *
  * @author kuangq
  * @date 2022-12-01 11:15
  */
-@SuppressWarnings("unchecked")
 @Service
 public class CacheServiceImpl implements CacheService {
 
@@ -45,8 +42,8 @@ public class CacheServiceImpl implements CacheService {
      * @author kuangq
      * @date 2022-12-09 17:35
      */
-    @SuppressWarnings("rawtypes")
     @SneakyThrows
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private Set<String> scanKeys(String key) {
         final int maxSize = 1000;
         long startTime = System.currentTimeMillis();
@@ -71,6 +68,7 @@ public class CacheServiceImpl implements CacheService {
      * @date 2022-12-01 14:47
      */
     @Override
+    @SuppressWarnings("unchecked")
     public ApiResult selectCacheInfo(CacheInfo cacheInfo) {
         Set<String> keySet = scanKeys(cacheInfo.getKey());
         Set<CacheInfo> cacheInfoSet = Collections.synchronizedSet(new HashSet<>());
@@ -78,8 +76,7 @@ public class CacheServiceImpl implements CacheService {
             keySet.parallelStream().forEach(key -> {
                 CacheInfo item = new CacheInfo();
                 item.setKey(key);
-                //noinspection ConstantConditions
-                item.setType(CacheUtil.CLIENT.type(key).name());
+                item.setType(Objects.requireNonNull(CacheUtil.CLIENT.type(key)).name());
                 cacheInfoSet.add(item);
             });
             return ApiResult.success(cacheInfoSet);
@@ -112,6 +109,7 @@ public class CacheServiceImpl implements CacheService {
      * @date 2022-12-09 16:16
      */
     @Override
+    @SuppressWarnings("unchecked")
     public ApiResult selectCacheInfoDetails(String key) {
         DataType dataType = CacheUtil.CLIENT.type(key);
         if (dataType == DataType.NONE) {
@@ -119,8 +117,7 @@ public class CacheServiceImpl implements CacheService {
         }
         CacheInfoDetails cacheInfoDetails = new CacheInfoDetails();
         cacheInfoDetails.setKey(key);
-        //noinspection ConstantConditions
-        cacheInfoDetails.setType(dataType.name());
+        cacheInfoDetails.setType(Objects.requireNonNull(dataType).name());
         cacheInfoDetails.setExpire(CacheUtil.STRING.getExpire(key));
         cacheInfoDetails.setExpireHum(DateUtil.getStr(cacheInfoDetails.getExpire()));
         if (dataType == DataType.STRING) {
@@ -154,42 +151,58 @@ public class CacheServiceImpl implements CacheService {
      * @date 2022-12-09 16:16
      */
     @Override
+    @SuppressWarnings("unchecked")
     public ApiResult deleteCacheInfo(CacheInfoDetails cacheInfoDetails) {
         String key = cacheInfoDetails.getKey();
-        if (StringUtils.isBlank(key)) {
-            return ApiResult.failure("key can not be blank", null);
-        }
+        Assert.hasText(key, "key can not be blank");
+        //未传入type进行模糊匹配并删除
         String type = cacheInfoDetails.getType();
         if (StringUtils.isBlank(type)) {
             Set<String> keySet = CacheUtil.CLIENT.keys(key);
-            if (keySet == null) {
+            if (keySet == null || keySet.isEmpty()) {
                 return ApiResult.success();
             }
             keySet.parallelStream().forEach(item -> CacheUtil.KEY.delete(item));
             return ApiResult.success(keySet.size());
         }
+        //根据type数据类型删除
         DataType dataType = DataType.valueOf(type);
         if (dataType == DataType.STRING) {
-            return ApiResult.success(CacheUtil.KEY.delete(key));
+            return deleteInvoke(() -> CacheUtil.KEY.delete(key));
         }
         if (dataType == DataType.HASH) {
             String field = cacheInfoDetails.getField();
-            if (StringUtils.isBlank(field)) {
-                return ApiResult.failure("field can not be blank", null);
-            }
-            return ApiResult.success(CacheUtil.HASH.delete(key, field));
+            Assert.hasText(field, "field can not be blank");
+            return deleteInvoke(() -> CacheUtil.HASH.delete(key, field));
         }
+        //根据value删除指定元素
         Object value = cacheInfoDetails.getValue();
-        if (value == null) {
-            return ApiResult.failure("value can not be empty", null);
-        }
+        Assert.notNull(value, "value can not be null");
         if (dataType == DataType.SET) {
-            return ApiResult.success(CacheUtil.SET.delete(key, value));
+            return deleteInvoke(() -> CacheUtil.SET.delete(key, value));
         }
         if (dataType == DataType.LIST) {
-            return ApiResult.success(CacheUtil.LIST.delete(key, value));
+            return deleteInvoke(() -> CacheUtil.LIST.delete(key, value));
         }
         return ApiResult.hintEnum(HintEnum.HINT_1080);
+    }
+
+    /**
+     * 缓存删除并校验删除结果
+     *
+     * @author kuangq
+     * @date 2023-03-23 14:10
+     */
+    @SneakyThrows
+    private ApiResult deleteInvoke(Callable<Object> callable) {
+        Object object = callable.call();
+        if (object.getClass().equals(Long.class) && (long) object > 0) {
+            return ApiResult.success(object);
+        }
+        if (object.getClass().equals(Boolean.class) && (boolean) object) {
+            return ApiResult.success(object);
+        }
+        return ApiResult.hintEnum(HintEnum.HINT_1079);
     }
 
     /**
@@ -211,10 +224,14 @@ public class CacheServiceImpl implements CacheService {
                 String field = cacheInfoDetails.getField();
                 CacheUtil.HASH.put(key, field, newValue);
             } else if (dataType == DataType.SET) {
+                if (CacheUtil.SET.add(key, newValue) < 1) {
+                    return ApiResult.hintEnum(HintEnum.HINT_1079);
+                }
                 CacheUtil.SET.delete(key, oldValue);
-                CacheUtil.SET.add(key, newValue);
             } else if (dataType == DataType.LIST) {
-                CacheUtil.LIST.rPush(key, oldValue, newValue);
+                if (CacheUtil.LIST.rPush(key, oldValue, newValue) < 1) {
+                    return ApiResult.hintEnum(HintEnum.HINT_1079);
+                }
                 CacheUtil.LIST.delete(key, oldValue);
             } else {
                 return ApiResult.hintEnum(HintEnum.HINT_1080);
@@ -236,9 +253,7 @@ public class CacheServiceImpl implements CacheService {
     @Override
     public ApiResult insertCacheInfo(InsertCacheInfo insertCacheInfo) {
         String key = insertCacheInfo.getKey();
-        if (CacheUtil.KEY.has(key)) {
-            return ApiResult.failure("该key已经存在", key);
-        }
+        Assert.isTrue(!CacheUtil.KEY.has(key), "该key已经存在");
         DataType dataType = DataType.valueOf(insertCacheInfo.getType());
         if (dataType == DataType.STRING) {
             CacheUtil.STRING.set(key, insertCacheInfo.getValue());

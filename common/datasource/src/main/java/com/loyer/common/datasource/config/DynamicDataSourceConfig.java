@@ -116,7 +116,7 @@ public class DynamicDataSourceConfig implements EnvironmentAware, BeanDefinition
      * @author kuangq
      * @date 2021-06-27 12:16
      */
-    private BeanDefinition getBeanDefinition(Class clazz, Object instance) {
+    private <T> BeanDefinition getBeanDefinition(Class<T> clazz, T instance) {
         return BeanDefinitionBuilder.genericBeanDefinition(clazz, () -> instance).getRawBeanDefinition();
     }
 }

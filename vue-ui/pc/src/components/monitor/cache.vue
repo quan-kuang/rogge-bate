@@ -43,7 +43,7 @@
                     </el-table>
                     <!--树状结构-->
                     <el-table ref="table-key" :data="cacheInfoTree" :highlight-current-row="true" row-key="key" :height="tableMaxHeight-41" :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
-                              @row-click="rowClick" @row-contextmenu="copy" v-show="formatTree">
+                            @row-click="rowClick" @row-contextmenu="copy" v-show="formatTree">
                         <el-table-column label="序号" type="" width="150" :formatter="formatIndex"/>
                         <el-table-column label="键名" prop="name" show-overflow-tooltip/>
                         <el-table-column label="操作" width="80" v-if="isHasAllPermissions(['cache:delete'])">
@@ -241,7 +241,14 @@ import copy from '@assets/js/mixin/copy';
 import common from '@assets/js/mixin/common';
 import storage from '@assets/js/config/storage';
 import constant from '@assets/js/common/constant';
-import {deleteCacheInfo, getRedis, insertCacheInfo, saveCacheInfo, selectCacheInfo, selectCacheInfoDetails} from '@assets/js/api/cache';
+import {
+    deleteCacheInfo,
+    getRedis,
+    insertCacheInfo,
+    saveCacheInfo,
+    selectCacheInfo,
+    selectCacheInfoDetails,
+} from '@assets/js/api/cache';
 
 export default {
     name: 'cache',
@@ -435,21 +442,24 @@ export default {
         /* 键值点击行事件*/
         rowClickDetails(row) {
             if (this.details.type === 'STRING') {
-                if (typeof this.details.value === 'object') {
-                    this.details.content = JSON.stringify(this.details.value);
-                } else {
-                    this.details.content = this.details.value;
-                }
+                this.details.content = this.formatValue(this.details.value);
             } else if (this.details.type === 'HASH') {
                 this.details.field = row.value;
-                this.details.content = this.details.value[row.value];
+                this.details.content = this.formatValue(this.details.value[row.value]);
             } else {
                 this.details.field = row.key - 1;
-                this.details.content = this.details.value[row.key - 1];
+                this.details.content = this.formatValue(this.details.value[row.key - 1]);
             }
             this.details.index = row.key - 1;
             this.details.oldValue = global.deepClone(this.details.content);
             this.details = Object.assign({}, this.details);
+        },
+        /* 序列化值*/
+        formatValue(value) {
+            if (typeof value === 'object') {
+                return JSON.stringify(value);
+            }
+            return value;
         },
         /* 设置序号*/
         setIndexMap(tree, parent) {
@@ -558,7 +568,10 @@ export default {
                     if (self.details.type === 'HASH') {
                         self.details.value[self.details.field] = self.details.content;
                     } else {
-                        self.detailsList[self.details.index] = {key: self.details.index + 1, value: self.details.content};
+                        self.detailsList[self.details.index] = {
+                            key: self.details.index + 1,
+                            value: self.details.content,
+                        };
                         self.filterCacheInfoDetails();
                     }
                     self.messageSuccess(response.msg);

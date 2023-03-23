@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -283,7 +284,7 @@ public class AttachmentServiceImpl implements AttachmentService {
                 String filePath = SystemConst.LOCAL_FILE_PATH + path;
                 File file = new File(filePath);
                 if (file.exists()) {
-                    inputStream = new FileInputStream(file);
+                    inputStream = Files.newInputStream(file.toPath());
                 }
             }
             //FTP文件下载

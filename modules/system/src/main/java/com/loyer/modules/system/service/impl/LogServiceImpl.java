@@ -83,7 +83,7 @@ public class LogServiceImpl implements LogService {
                 user = loginUser.getUser();
             } else {
                 //根据token获取用户信息
-                user = SecurityUtil.getLoginUser(operateLog.getToken()).getUser();
+                user = Objects.requireNonNull(SecurityUtil.getLoginUser(operateLog.getToken())).getUser();
             }
         } catch (Exception e) {
             user = new User();

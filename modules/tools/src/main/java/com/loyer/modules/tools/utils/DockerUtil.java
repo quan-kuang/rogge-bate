@@ -13,9 +13,10 @@ import com.loyer.modules.tools.entity.DockerEntity;
 import com.loyer.modules.tools.inherit.ExecStartCmdCallback;
 import lombok.SneakyThrows;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,7 +121,7 @@ public class DockerUtil {
      */
     @SneakyThrows
     public static void copyFileToContainer(DockerEntity dockerEntity) {
-        try (DockerClient dockerClient = getDockerClient(dockerEntity); InputStream inputStream = new FileInputStream(dockerEntity.getLocalPath())) {
+        try (DockerClient dockerClient = getDockerClient(dockerEntity); InputStream inputStream = Files.newInputStream(Paths.get(dockerEntity.getLocalPath()))) {
             dockerClient.copyArchiveToContainerCmd(dockerEntity.getContainerId()).withRemotePath(dockerEntity.getRemotePath()).withTarInputStream(inputStream).exec();
         }
     }

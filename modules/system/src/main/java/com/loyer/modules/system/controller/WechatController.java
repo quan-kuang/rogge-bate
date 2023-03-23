@@ -99,9 +99,9 @@ public class WechatController {
         String xmlResult = WeChatUtil.postLink(xmlStr);
         httpServletResponse.setCharacterEncoding(StandardCharsets.UTF_8.name());
         httpServletResponse.setContentType(MediaType.TEXT_XML_VALUE);
-        PrintWriter printWriter = httpServletResponse.getWriter();
-        printWriter.write(xmlResult);
-        printWriter.close();
+        try (PrintWriter printWriter = httpServletResponse.getWriter()) {
+            printWriter.write(xmlResult);
+        }
     }
 
     @OperateLogAnnotation

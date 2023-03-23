@@ -9,6 +9,7 @@ import com.loyer.common.datasource.entity.PageParams;
 import com.loyer.common.datasource.entity.PageResult;
 import com.loyer.common.dedicine.enums.HintEnum;
 import com.loyer.common.dedicine.exception.BusinessException;
+import com.loyer.common.dedicine.utils.TypeUtil;
 import lombok.SneakyThrows;
 import org.springframework.aop.support.AopUtils;
 
@@ -80,7 +81,7 @@ public class PageHelperUtil {
         Method method = Arrays.stream(Class.forName(targetClassName).getMethods()).filter(item -> item.getName().equals(methodName)).findFirst().orElse(null);
         Object data = Objects.requireNonNull(method, String.format("函数未定义：%s:%s", targetClassName, methodName)).invoke(instance, params);
         //组装分页结果
-        PageInfo<T> pageInfo = new PageInfo<T>((List) data);
+        PageInfo<T> pageInfo = new PageInfo<>(TypeUtil.convert(data));
         return new PageResult<>(pageInfo.getTotal(), pageInfo.getList());
     }
 }

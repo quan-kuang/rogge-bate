@@ -4,7 +4,7 @@
         <panel-title>
             <el-button class="refresh-button" icon="el-icon-refresh" @click="refresh"/>
             <el-upload class="upload-button" :multiple="true" :show-file-list="false" :action="uploadUrl" :data="fileData" :limit="fileLimit" :headers="headers" :before-upload="beforeUpload" :on-success="onSuccess"
-                       v-has-all-permissions="['attachment:insert']">
+                    v-has-all-permissions="['attachment:insert']">
                 <el-tooltip class="item" effect="dark" content="右键设置" placement="top">
                     <el-button type="success" icon="el-icon-circle-plus-outline" @contextmenu.prevent.native="isDialog = true">新增</el-button>
                 </el-tooltip>
@@ -49,7 +49,7 @@
             <el-table-column prop="source" label="存储位置" align="center" width="120" :formatter="formatSource"/>
             <el-table-column prop="path" label="文件地址" align="center" show-overflow-tooltip>
                 <template slot-scope="scope">
-                    <el-link :underline="false" target="_blank" :href="getFileUrl(scope.row)">{{ scope.row.path }}</el-link>
+                    <el-link :underline="false" target="_blank" :href="getFileUrl(scope.row)" @contextmenu.prevent.native="hbdtwx($event, getFileUrl(scope.row))">{{ scope.row.path }}</el-link>
                 </template>
             </el-table-column>
             <el-table-column prop="creatorName" label="创建人" align="center" width="120"/>
@@ -63,8 +63,8 @@
         </el-table>
         <!--分页控件-->
         <el-pagination class="el-pagination-2" background layout='total, sizes, prev, pager, next, jumper' v-show="fileTotal>10"
-                       :page-sizes='pageSizes' :total="fileTotal" :page-size="pageSize" :current-page="pageNum"
-                       @size-change="sizeChange" @current-change="currentChange"/>
+                :page-sizes='pageSizes' :total="fileTotal" :page-size="pageSize" :current-page="pageNum"
+                @size-change="sizeChange" @current-change="currentChange"/>
         <!--新增设置的右键窗口-->
         <el-dialog class="add-file" title="新增设置" :visible.sync="isDialog" :append-to-body="true" width="40%">
             <el-row :gutter="15">
@@ -117,13 +117,14 @@
 <script>
 import file from './js/file';
 import verify from '@assets/js/util/verify';
+import copy from '@assets/js/mixin/copy';
 import common from '@assets/js/mixin/common';
 import {download} from '@assets/js/util/download';
 import {deleteAttachment, saveAttachment, selectAttachment} from '@assets/js/api/attachment';
 
 export default {
     name: 'attachment',
-    mixins: [common, file],
+    mixins: [common, copy, file],
     data() {
         return {
             fileData: {

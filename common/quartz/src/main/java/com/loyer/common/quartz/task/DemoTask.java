@@ -38,7 +38,7 @@ public class DemoTask {
      * @date 2020-12-18 11:01
      */
     @SuppressWarnings("AlibabaLowerCamelCaseVariableNaming")
-    public Map haveParams(String str, Integer I, int i, Long L, long l, Float F, float f, Double D, double d, Boolean B, boolean b) {
+    public Map<String, Object> haveParams(String str, Integer I, int i, Long L, long l, Float F, float f, Double D, double d, Boolean B, boolean b) {
         return new HashMap<String, Object>(16) {{
             put("String", str);
             put("Integer", I);

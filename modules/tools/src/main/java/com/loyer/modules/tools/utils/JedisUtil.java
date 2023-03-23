@@ -6,6 +6,7 @@ import com.loyer.common.core.utils.common.OracleUtil;
 import com.loyer.common.dedicine.entity.ApiResult;
 import com.loyer.common.dedicine.enums.HintEnum;
 import com.loyer.common.dedicine.exception.BusinessException;
+import com.loyer.common.dedicine.utils.TypeUtil;
 import com.loyer.modules.tools.entity.ClusterNode;
 import com.loyer.modules.tools.entity.JedisEntity;
 import com.loyer.modules.tools.enums.RedisRoleType;
@@ -190,10 +191,10 @@ public class JedisUtil {
     public static TreeMap<Integer, String> clusterSlotsFormat(List<Object> objectList) {
         TreeMap<Integer, String> slotHostMap = new TreeMap<>();
         objectList.forEach(item -> {
-            List<Object> slotObject = (List) item;
+            List<Object> slotObject = TypeUtil.convert(item);
             Integer startSlot = ((Long) slotObject.get(0)).intValue();
             Integer endSlot = ((Long) slotObject.get(1)).intValue();
-            List<Object> hostMap = (List) slotObject.get(2);
+            List<Object> hostMap = TypeUtil.convert(slotObject.get(2));
             String hostAndPort = String.format("%s:%s", new String((byte[]) hostMap.get(0)), hostMap.get(1));
             slotHostMap.put(startSlot, hostAndPort);
             slotHostMap.put(endSlot, hostAndPort);

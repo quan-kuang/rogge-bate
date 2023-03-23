@@ -281,7 +281,7 @@ public class ElasticsearchUtil {
             for (SearchHit searchHit : searchHits.getHits()) {
                 Map<String, Object> map = searchHit.getSourceAsMap();
                 if (map == null) {
-                    map = new HashMap(1);
+                    map = new HashMap<>(1);
                 }
                 map.put("uuid", searchHit.getId());
                 list.add(map);

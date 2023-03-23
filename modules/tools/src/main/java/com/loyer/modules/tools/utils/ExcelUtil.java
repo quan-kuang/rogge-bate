@@ -35,8 +35,7 @@ public class ExcelUtil {
     @SneakyThrows
     public static byte[] getExcelBytes(ExcelData excelData) {
         //创建字节输出流，保证最后关闭
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            Workbook workbook = createExcel(excelData.getFileName(), excelData.getColumns(), excelData.getDataList());
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(); Workbook workbook = createExcel(excelData.getFileName(), excelData.getColumns(), excelData.getDataList())) {
             workbook.write(byteArrayOutputStream);
             return byteArrayOutputStream.toByteArray();
         }

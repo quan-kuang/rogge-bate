@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
 
 /**
  * 文件服务器上传下载
@@ -64,7 +65,7 @@ public class FtpClientUtil {
             logger.error("【{}文件不存在】", localFilePath);
             return false;
         }
-        InputStream inputStream = new FileInputStream(file);
+        InputStream inputStream = Files.newInputStream(file.toPath());
         return upload(serverFilePath, file.getName(), inputStream);
     }
 

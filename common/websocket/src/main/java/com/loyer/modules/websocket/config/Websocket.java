@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Websocket通讯 同步异步说明参考：http://blog.csdn.net/who_is_xiaoming/article/details/53287691
+ * Websocket通讯 同步异步说明参考：<a href="http://blog.csdn.net/who_is_xiaoming/article/details/53287691"></a>
  *
  * @author kuangq
  * @date 2021-07-18 1:34

@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * 股票信息分析工具类（数据来源：http://data.eastmoney.com/zjlx/detail.html）
+ * 股票信息分析工具类（数据来源：<a href="http://data.eastmoney.com/zjlx/detail.html"></a>）
  *
  * @author kuangq
  * @date 2021-09-15 22:11

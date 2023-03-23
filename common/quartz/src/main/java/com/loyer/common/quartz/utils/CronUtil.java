@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Corn表达式工具类：cron表达式生成地址：http://cron.qqe2.com/
+ * Corn表达式工具类：cron表达式生成地址：<a href="http://cron.qqe2.com/"></a>
  *
  * @author kuangq
  * @date 2020-12-16 17:13

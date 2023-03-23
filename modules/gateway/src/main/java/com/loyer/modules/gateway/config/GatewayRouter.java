@@ -22,7 +22,7 @@ import java.util.HashMap;
 public class GatewayRouter {
 
     /**
-     * index，避免直接访问提示404问题
+     * index，避免直接访问提示404的问题
      *
      * @author kuangq
      * @date 2021-12-20 16:41

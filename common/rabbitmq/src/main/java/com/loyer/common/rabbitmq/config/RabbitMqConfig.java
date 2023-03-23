@@ -51,7 +51,7 @@ public class RabbitMqConfig {
     public RabbitTemplate rabbitTemplate() {
         //确认机制
         cachingConnectionFactory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.CORRELATED);
-        //使用单独的发送连接，避免生产者由于各种原因阻塞而导致消费者同样阻塞
+        //使用单独地发送连接，避免生产者由于各种原因阻塞而导致消费者同样阻塞
         cachingConnectionFactory.setPublisherReturns(true);
         //创建RabbitTemplate一个使用对象
         RabbitTemplate rabbitTemplate = new RabbitTemplate(cachingConnectionFactory);

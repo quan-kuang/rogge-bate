@@ -2,6 +2,7 @@ package com.loyer.common.core.utils.document;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +28,7 @@ public class JsonUtil {
         try {
             File file = new File(filePath);
             fileReader = new FileReader(file);
-            reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8);
+            reader = new InputStreamReader(Files.newInputStream(file.toPath()), StandardCharsets.UTF_8);
             int length;
             StringBuilder stringBuilder = new StringBuilder();
             while ((length = reader.read()) != -1) {

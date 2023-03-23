@@ -216,7 +216,7 @@ public class PuzzleCaptchaUtil {
         //随机凸/凹类型
         int shape = getNonceByRange(0, 1);
         //圆的标准方程 (x-a)²+(y-b)²=r²,标识圆心（a,b）,半径为r的圆
-        //计算需要的小图轮廓，用二维数组来表示，二维数组有两张值，0和1，其中0表示没有颜色，1有颜色
+        //计算需要的小图轮廓，用二维数组来表示，二维数组有两个值，0和1，其中0表示没有颜色，1有颜色
         for (int i = 0; i < blockWidth; i++) {
             for (int j = 0; j < blockHeight; j++) {
                 data[i][j] = 0;
