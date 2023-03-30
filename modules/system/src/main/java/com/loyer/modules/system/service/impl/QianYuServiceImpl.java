@@ -77,7 +77,7 @@ public class QianYuServiceImpl implements QianYuService {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH");
         String key = String.format("%s%s:%s", com.loyer.modules.system.constant.PrefixConst.WE_CHAT_MESSAGE, date, openId);
         List<WeChatMessage> weChatMessageList = CacheUtil.LIST.range(key);
-        return new TreeMap<>(weChatMessageList.parallelStream()
+        return new TreeMap<>(weChatMessageList.stream()
                 .filter(item -> "event".equals(item.getMsgType()) && "CLICK".equals(item.getEvent()) && "1".equals(item.getEventKey()))
                 .map(item -> simpleDateFormat.format(item.getCreateTime() * 1000))
                 .collect(Collectors.groupingBy(val -> val, Collectors.counting())));

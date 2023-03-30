@@ -4,23 +4,7 @@
 
     <!--定义operate_log表的查询SQL-->
     <sql id="selectOperateLogSql">
-        SELECT a.uuid,
-               a.server_ip,
-               a.client_ip,
-               a.url,
-               a.type,
-               a.path,
-               a.method,
-               a.in_args,
-               a.out_args,
-               a.title,
-               a.creator_id,
-               a.creator_name,
-               a.create_dept_id,
-               a.status,
-               a.elapsed_time,
-               a.remark,
-               a.create_time
+        SELECT a.uuid, a.server_ip, a.client_ip, a.url, a.type, a.path, a.method, a.in_args, a.out_args, a.title, a.creator_id, a.creator_name, a.create_dept_id, a.status, a.elapsed_time, a.remark, a.create_time
     </sql>
 
     <!--定义operate_log表的过滤SQL-->
@@ -133,17 +117,16 @@
 
     <!--日志周统计-->
     <select id="logWeekStat" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT a.date, a.week, count(b.uuid)
-        FROM get_current_week(#{currentDate}) a LEFT JOIN operate_log b ON a.date = to_char(b.create_time, 'YYYY-MM-DD')
+        WITH weekinfo AS (SELECT * FROM get_current_week(#{currentDate})), loginfo AS (
+        SELECT uuid, TO_CHAR(create_time, 'YYYY-MM-DD') AS date FROM operate_log WHERE TO_CHAR(create_time, 'YYYY-MM-DD') IN (SELECT date FROM weekinfo)
         <!--数据权限过滤-->
         <if test="isAdmin != true and permissionScope != 0">
             <choose>
-                <when test="permissionScope == 4">AND b.creator_id = ${scopeSql}</when>
-                <otherwise>AND b.create_dept_id IN ${scopeSql}</otherwise>
+                <when test="permissionScope == 4">AND creator_id = ${scopeSql}</when>
+                <otherwise>AND create_dept_id IN ${scopeSql}</otherwise>
             </choose>
         </if>
-        GROUP BY a.week, a.date
-        ORDER BY a.date
+        ) SELECT a.date, a.week, COUNT(b.uuid) FROM weekinfo a LEFT JOIN loginfo b ON a.date = b.date GROUP BY a.week, a.date ORDER BY a.date
     </select>
 
     <!--批量删除日志记录-->

@@ -13,21 +13,22 @@
         </panel-title>
         <!--数据列表-->
         <ul :style="'height:'+tableMaxHeight+'px;overflow:auto;'">
-            <li v-for="(src, index) of fileList" :key="index">
-                <el-image lazy :class="{'mt': index>2, 'ml': index%3>0}" :src="src" :preview-src-list="previewSrcList" @dblclick.native="faceVerify($event)"/>
+            <li v-for="(item, index) of fileList" :key="index">
+                <el-tooltip :content="item.name" placement="top" effect="light">
+                    <el-image lazy :class="{'mt': index>2, 'ml': index%3>0}" :src="getFileUrl(item)" :preview-src-list="previewSrcList" @dblclick.native="faceVerify($event)"/>
+                </el-tooltip>
             </li>
         </ul>
         <!-- 分页控件 -->
         <el-pagination class="el-pagination-2" background layout='total, prev, pager, next, jumper' v-show="fileTotal>10"
-                       :page-sizes='pageSizes' :total="fileTotal" :page-size="pageSize" :current-page="pageNum"
-                       @size-change="sizeChange" @current-change="currentChange"/>
+                :page-sizes='pageSizes' :total="fileTotal" :page-size="pageSize" :current-page="pageNum"
+                @size-change="sizeChange" @current-change="currentChange"/>
     </div>
 </template>
 
 <script>
 import common from '@assets/js/mixin/common';
 import file from '@components/attachment/js/file';
-import global from '@assets/js/util/global';
 import {selectAttachment} from '@assets/js/api/attachment';
 import {faceDetect, faceVerify} from '@assets/js/api/baidu';
 
@@ -59,11 +60,7 @@ export default {
                 if (response.flag) {
                     const data = response.data;
                     self.fileTotal = data.total;
-                    const fileList = [];
-                    for (const item of data.list) {
-                        fileList.push(self.getFileUrl(item));
-                    }
-                    self.fileList = fileList;
+                    self.fileList = data.list;
                 } else {
                     self.messageError(response.msg);
                 }
@@ -121,10 +118,22 @@ export default {
                 });
             }
         },
+        getPreviewSrcList() {
+            const fileList = [];
+            for (const item of this.fileList) {
+                fileList.push(this.getFileUrl(item));
+            }
+            return fileList;
+        },
     },
     watch: {
         isPreview(newVal) {
-            this.previewSrcList = newVal ? global.deepClone(this.fileList) : [];
+            this.previewSrcList = newVal ? this.getPreviewSrcList() : [];
+        },
+        fileList() {
+            if (this.isPreview) {
+                this.previewSrcList = this.getPreviewSrcList();
+            }
         },
     },
 };
